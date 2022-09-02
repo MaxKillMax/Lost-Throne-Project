@@ -1,0 +1,293 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d60b726b849351f49af879607b2b5d02, type: 3}
+  m_Name: Tank
+  m_EditorClassIdentifier: 
+  _name: Tank
+  _icon: {fileID: 21300000, guid: 90ef4e061c067614eac04d795c71d690, type: 3}
+  _cardRarity: 1
+  _cardIcon: {fileID: 21300000, guid: 90ef4e061c067614eac04d795c71d690, type: 3}
+  _statistics:
+  - _type: 0
+    _valueEqualsMaxValue: 0
+    _basicMaxValue: 100
+    _maxValuePerAttributes:
+    - type: 0
+      value: 5
+    - type: 1
+      value: 5
+    - type: 2
+      value: 5
+    - type: 3
+      value: 5
+    - type: 4
+      value: 5
+    - type: 5
+      value: 5
+    _increaseMultiply: 1
+    _decreaseMultiply: 1
+    _maxValue: 0
+    _value: 0
+  - _type: 1
+    _valueEqualsMaxValue: 0
+    _basicMaxValue: 40
+    _maxValuePerAttributes:
+    - type: 0
+      value: 0
+    - type: 1
+      value: 4
+    - type: 2
+      value: 0
+    - type: 3
+      value: 1
+    - type: 4
+      value: 0
+    - type: 5
+      value: 1
+    _increaseMultiply: 1
+    _decreaseMultiply: 1
+    _maxValue: 100
+    _value: 100
+  - _type: 2
+    _valueEqualsMaxValue: 0
+    _basicMaxValue: 100
+    _maxValuePerAttributes:
+    - type: 0
+      value: 0
+    - type: 1
+      value: 1
+    - type: 2
+      value: 0
+    - type: 3
+      value: 2
+    - type: 4
+      value: 3
+    - type: 5
+      value: 0
+    _increaseMultiply: 1
+    _decreaseMultiply: 1
+    _maxValue: 0
+    _value: 0
+  - _type: 3
+    _valueEqualsMaxValue: 0
+    _basicMaxValue: 100
+    _maxValuePerAttributes:
+    - type: 0
+      value: 0
+    - type: 1
+      value: 1
+    - type: 2
+      value: 1
+    - type: 3
+      value: 1
+    - type: 4
+      value: 3
+    - type: 5
+      value: 0
+    _increaseMultiply: 1
+    _decreaseMultiply: 1
+    _maxValue: 0
+    _value: 0
+  - _type: 4
+    _valueEqualsMaxValue: 0
+    _basicMaxValue: 100
+    _maxValuePerAttributes:
+    - type: 0
+      value: 0
+    - type: 1
+      value: 1
+    - type: 2
+      value: 0
+    - type: 3
+      value: 1
+    - type: 4
+      value: 3
+    - type: 5
+      value: 1
+    _increaseMultiply: 1
+    _decreaseMultiply: 1
+    _maxValue: 0
+    _value: 0
+  - _type: 5
+    _valueEqualsMaxValue: 0
+    _basicMaxValue: 100
+    _maxValuePerAttributes:
+    - type: 0
+      value: 1
+    - type: 1
+      value: 1
+    - type: 2
+      value: 4
+    - type: 3
+      value: 0
+    - type: 4
+      value: 0
+    - type: 5
+      value: 0
+    _increaseMultiply: 1
+    _decreaseMultiply: 1
+    _maxValue: 0
+    _value: 0
+  - _type: 6
+    _valueEqualsMaxValue: 0
+    _basicMaxValue: 100
+    _maxValuePerAttributes:
+    - type: 0
+      value: 4
+    - type: 1
+      value: 0
+    - type: 2
+      value: 1
+    - type: 3
+      value: 1
+    - type: 4
+      value: 0
+    - type: 5
+      value: 0
+    _increaseMultiply: 1
+    _decreaseMultiply: 1
+    _maxValue: 0
+    _value: 0
+  - _type: 7
+    _valueEqualsMaxValue: 1
+    _basicMaxValue: 10
+    _maxValuePerAttributes:
+    - type: 0
+      value: 6
+    - type: 1
+      value: 0
+    - type: 2
+      value: 0
+    - type: 3
+      value: 0
+    - type: 4
+      value: 0
+    - type: 5
+      value: 0
+    _increaseMultiply: 1
+    _decreaseMultiply: 1
+    _maxValue: 15
+    _value: 15
+  - _type: 8
+    _valueEqualsMaxValue: 1
+    _basicMaxValue: 2
+    _maxValuePerAttributes:
+    - type: 0
+      value: 0
+    - type: 1
+      value: 3
+    - type: 2
+      value: 1
+    - type: 3
+      value: 0
+    - type: 4
+      value: 1
+    - type: 5
+      value: 1
+    _increaseMultiply: 1
+    _decreaseMultiply: 1
+    _maxValue: 0
+    _value: 0
+  - _type: 9
+    _valueEqualsMaxValue: 1
+    _basicMaxValue: 40
+    _maxValuePerAttributes:
+    - type: 0
+      value: 0
+    - type: 1
+      value: 0
+    - type: 2
+      value: 0
+    - type: 3
+      value: 5
+    - type: 4
+      value: 0
+    - type: 5
+      value: 1
+    _increaseMultiply: 1
+    _decreaseMultiply: 1
+    _maxValue: 0
+    _value: 0
+  - _type: 10
+    _valueEqualsMaxValue: 1
+    _basicMaxValue: 0
+    _maxValuePerAttributes:
+    - type: 0
+      value: 0
+    - type: 1
+      value: 0
+    - type: 2
+      value: 4
+    - type: 3
+      value: 0
+    - type: 4
+      value: 1
+    - type: 5
+      value: 1
+    _increaseMultiply: 1
+    _decreaseMultiply: 1
+    _maxValue: 0
+    _value: 0
+  - _type: 11
+    _valueEqualsMaxValue: 1
+    _basicMaxValue: 2
+    _maxValuePerAttributes:
+    - type: 0
+      value: 0
+    - type: 1
+      value: 0
+    - type: 2
+      value: 0
+    - type: 3
+      value: 0
+    - type: 4
+      value: 0
+    - type: 5
+      value: 6
+    _increaseMultiply: 1
+    _decreaseMultiply: 1
+    _maxValue: 0
+    _value: 0
+  - _type: 12
+    _valueEqualsMaxValue: 1
+    _basicMaxValue: 0
+    _maxValuePerAttributes:
+    - type: 0
+      value: 1
+    - type: 1
+      value: 3
+    - type: 2
+      value: 0
+    - type: 3
+      value: 0
+    - type: 4
+      value: 1
+    - type: 5
+      value: 1
+    _increaseMultiply: 1
+    _decreaseMultiply: 1
+    _maxValue: 40
+    _value: 40
+  _attributesAreNotNeeded: 1
+  _attributes:
+  - type: 0
+    value: 5
+  - type: 1
+    value: 5
+  - type: 2
+    value: 5
+  - type: 3
+    value: 5
+  - type: 4
+    value: 5
+  - type: 5
+    value: 5
