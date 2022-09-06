@@ -1,5 +1,5 @@
 
-namespace Game.OpenWorld
+namespace LostThrone.OpenWorld
 {
     public class Tower : Unit
     {

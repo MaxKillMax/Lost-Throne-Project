@@ -1,9 +1,11 @@
 using UnityEngine;
 
-namespace Game.Board
+namespace LostThrone.Board
 {
     public class UnitCard : Card
     {
+        public override CardType Type => CardType.Unit;
+
         private int _turnCost;
         public int TurnCost => _turnCost;
 
@@ -45,7 +47,7 @@ namespace Game.Board
 
         public override void GetDamage(float value)
         {
-            float health = _unit.GetStatistics(StatisticsType.Health).Value - value * (100 - _unit.GetStatistics(StatisticsType.Armor).Value) / 100;
+            float health = _unit.GetStatistics(StatisticsType.Health).Value - Services.GetService<Formulas>().DamageReducedByArmor(value, _unit.GetStatistics(StatisticsType.Armor).Value);
             _unit.GetStatistics(StatisticsType.Health).SetValue(health);
 
             if (health <= 0)

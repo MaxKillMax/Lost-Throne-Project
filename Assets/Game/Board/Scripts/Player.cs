@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
-using Game.OpenWorld;
+using LostThrone.OpenWorld;
 
-namespace Game.Board
+namespace LostThrone.Board
 {
     public class Player : MonoBehaviour
     {
@@ -30,7 +30,7 @@ namespace Game.Board
             _cards = new List<UnitCard>(units.Count);
             for (int i = 0; i < units.Count; i++)
                 InitializeUnit(units[i]);
-            board.RefreshLinePositions(_hand);
+            Services.GetService<BoardBase>().RefreshLinePositions(_hand);
         }
 
         public void EndBattle()
@@ -69,9 +69,9 @@ namespace Game.Board
 
         public void DestroyCard(UnitCard card)
         {
-            Cell cell = _board.FindCellOfCard(card, out int h, out int v);
+            Cell cell = Services.GetService<BoardBase>().GetCardCell(_board, card, out int h, out int v);
             cell.GetLine(Type).RemoveCard(card);
-            _board.RefreshLinePositions(cell.GetLine(Type));
+            Services.GetService<BoardBase>().RefreshLinePositions(cell.GetLine(Type));
             _cards.Remove(card);
             Destroy(card.gameObject);
         }

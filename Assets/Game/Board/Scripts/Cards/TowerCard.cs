@@ -1,8 +1,10 @@
 
-namespace Game.Board
+namespace LostThrone.Board
 {
     public class TowerCard : Card
     {
+        public override CardType Type => CardType.Tower;
+
         protected Cell _cell;
 
         public bool IsDestroyed => !gameObject.activeSelf;
@@ -13,11 +15,27 @@ namespace Game.Board
             _player = player;
             _unit = unit;
             _cell = cell;
+
+            _unit.GetStatistics(StatisticsType.Damage).OnValueChanged += RefreshStatistics;
+            _unit.GetStatistics(StatisticsType.Armor).OnValueChanged += RefreshStatistics;
+            _unit.GetStatistics(StatisticsType.Health).OnValueChanged += RefreshStatistics;
+
+            RefreshUI();
+        }
+
+        private void OnDestroy()
+        {
+            if (_unit != null)
+            {
+                _unit.GetStatistics(StatisticsType.Damage).OnValueChanged -= RefreshStatistics;
+                _unit.GetStatistics(StatisticsType.Armor).OnValueChanged -= RefreshStatistics;
+                _unit.GetStatistics(StatisticsType.Health).OnValueChanged -= RefreshStatistics;
+            }
         }
 
         public override void GetDamage(float value)
         {
-            float health = _unit.GetStatistics(StatisticsType.Health).Value - value * (100 - _unit.GetStatistics(StatisticsType.Armor).Value) / 100;
+            float health = _unit.GetStatistics(StatisticsType.Health).Value - Services.GetService<Formulas>().DamageReducedByArmor(value, _unit.GetStatistics(StatisticsType.Armor).Value);
             _unit.GetStatistics(StatisticsType.Health).SetValue(health);
 
             if (health <= 0)

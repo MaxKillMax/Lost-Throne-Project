@@ -2,7 +2,7 @@ using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Game.OpenWorld
+namespace LostThrone.OpenWorld
 {
     public class Player : MonoBehaviour
     {

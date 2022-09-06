@@ -1,9 +1,9 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using Game.OpenWorld;
+using LostThrone.OpenWorld;
 
-namespace Game.Board
+namespace LostThrone.Board
 {
     public abstract class Card : MonoBehaviour
     {
@@ -38,6 +38,8 @@ namespace Game.Board
         protected Player _player;
         public Player Player => _player;
 
+        public abstract CardType Type { get; }
+
         public void OpenInfoPanel()
         {
             _infoObject.SetActive(true);
@@ -53,5 +55,11 @@ namespace Game.Board
         public abstract void GetDamage(float value);
 
         protected abstract void RefreshUI();
+    }
+
+    public enum CardType
+    {
+        Unit,
+        Tower
     }
 }

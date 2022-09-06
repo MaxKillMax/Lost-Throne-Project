@@ -1,5 +1,5 @@
 
-namespace Game.Board
+namespace LostThrone.Board
 {
     public abstract class Command
     {

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Game.Board
+namespace LostThrone.Board
 {
     public class AIInput : MonoBehaviour
     {
@@ -16,6 +16,9 @@ namespace Game.Board
             if (_player.State != PlayerState.Attack || !_board.GameInProgress)
                 return;
 
+            if (_player.Cards.Count == 0)
+                _board.EndTurn();
+
             _time -= Time.deltaTime;
 
             if (_time > 0)
@@ -25,22 +28,29 @@ namespace Game.Board
 
             if (TryFindAttackUnitAndEnemyUnit(out UnitCard attackCard, out UnitCard enemyCard))
             {
-                new PickupCommand(_board, _player, attackCard).Execute();
-                new AttackCommand(_board, _player, attackCard, enemyCard, () => { new DropCommand(_board, _player, attackCard).Execute(); }).Execute();
+                //Debug.Log("Attack units: " + attackCard + " : " + enemyCard);
+                new PickupCommand(_board, _player, attackCard, () =>
+                new AttackUnitCommand(_board, _player, attackCard, enemyCard, () => 
+                new DropCommand(_board, _player, attackCard).Execute()).Execute()).Execute();
                 return;
             }
 
             if (TryAttackTowers(out UnitCard towerCard, out TowerCard tower))
             {
-                new PickupCommand(_board, _player, towerCard).Execute();
-                new AttackCommand(_board, _player, towerCard, tower, () => { new DropCommand(_board, _player, towerCard).Execute(); }).Execute();
+                //Debug.Log("Attack towers: " + towerCard + " : " + tower);
+                new PickupCommand(_board, _player, towerCard, () =>
+                new AttackTowerCommand(_board, _player, towerCard, tower, () => 
+                new DropCommand(_board, _player, towerCard).Execute()).Execute()).Execute();
                 return;
             }
 
-            if (TryFindCardWithMinTurnCost(out UnitCard movementCard) && TryFindMovementCell(movementCard, out Cell movementCell))
+            UnitCard movementCard = Services.GetService<BoardBase>().GetUnitWithBestCondition(_player.Cards, false, (unit) => unit.TurnCost, out float value);
+            if (Services.GetService<BoardBase>().UnitCanMove(movementCard, _player) && TryFindMovementCell(movementCard, out Cell movementCell))
             {
-                new PickupCommand(_board, _player, movementCard).Execute();
-                new MovementCommand(_board, _player, movementCard, movementCell, () => { new DropCommand(_board, _player, movementCard).Execute(); }).Execute();
+                //Debug.Log("Move units: " + movementCard + " : " + movementCell);
+                new PickupCommand(_board, _player, movementCard, () =>
+                new MovementCommand(_board, _player, movementCard, movementCell, () => 
+                new DropCommand(_board, _player, movementCard).Execute()).Execute()).Execute();
                 return;
             }
 
@@ -57,10 +67,10 @@ namespace Game.Board
 
             for (int i = 0; i < _player.Cards.Count; i++)
             {
-                if (!CanDo(_player.Cards[i]))
+                if (!Services.GetService<BoardBase>().UnitCanMove(_player.Cards[i], _player))
                     continue;
 
-                Cell cell = _board.FindCellOfCard(_player.Cards[i], out int horizontal, out int vertical);
+                Cell cell = Services.GetService<BoardBase>().GetCardCell(_board, _player.Cards[i], out int horizontal, out int vertical);
                 if (cell == null)
                     continue;
 
@@ -70,7 +80,7 @@ namespace Game.Board
 
                 for (int x = 0; x < enemyLine.Cards.Count; x++)
                 {
-                    if (CanKillCard(_player.Cards[i], enemyLine.Cards[x]))
+                    if (Services.GetService<BoardBase>().UnitCanDie(enemyLine.Cards[x], _player.Cards[i]))
                     {
                         unit = _player.Cards[i];
                         enemy = enemyLine.Cards[x];
@@ -80,7 +90,7 @@ namespace Game.Board
 
                 for (int x = 0; x < enemyLine.Cards.Count; x++)
                 {
-                    float currentPriority = GetCardAttackPriority(enemyLine.Cards[x]);
+                    float currentPriority = Services.GetService<Formulas>().GetUnitAttackImportance(enemyLine.Cards[x].Unit);
                     if (CanAttack(findedUnit, _player.Cards[i], priority, currentPriority))
                     {
                         priority = currentPriority;
@@ -97,92 +107,60 @@ namespace Game.Board
 
         private bool TryAttackTowers(out UnitCard unit, out TowerCard tower)
         {
-            float minTowerHealth = float.MaxValue;
-            UnitCard findedUnit= null;
-            TowerCard findedTower = null;
+            unit = default;
+            tower = default;
+
+            List<TowerCard> findedTowers = new List<TowerCard>();
+            List<UnitCard> units = new List<UnitCard>();
 
             for (int i = 0; i < _player.Cards.Count; i++)
             {
-                if (!CanDo(_player.Cards[i]))
+                if (!Services.GetService<BoardBase>().UnitCanMove(_player.Cards[i], _player))
                     continue;
 
-                Cell cell = _board.FindCellOfCard(_player.Cards[i], out int horizontal, out int vertical);
+                Cell cell = Services.GetService<BoardBase>().GetCardCell(_board, _player.Cards[i], out int horizontal, out int vertical);
                 if (cell == null || vertical != _board.PlayerLine)
                     continue;
 
-                if (_board.TryGetTower(horizontal, vertical, out TowerCard gettedTower))
+                if (Services.GetService<BoardBase>().TryGetTower(_board, horizontal, vertical, out tower))
                 {
-                    if (gettedTower.Unit.GetStatistics(StatisticsType.Health).Value < minTowerHealth)
-                    {
-                        findedUnit = _player.Cards[i];
-                        findedTower = gettedTower;
-                    }
+                    findedTowers.Add(tower);
+                    units.Add(_player.Cards[i]);
                 }
             }
 
-            unit = findedUnit;
-            tower = findedTower;
+            
+            for (int i = 0; i < findedTowers.Count; i++)
+            {
+                if (Services.GetService<BoardBase>().UnitCanDie(findedTowers[i], units[i]))
+                {
+                    unit = units[i];
+                    tower = findedTowers[i];
+                    return true;
+                }
+            }
+
+            if (findedTowers.Count > 0)
+            {
+                unit = (UnitCard)Services.GetService<BoardBase>().GetUnitWithBestAttackImportance(units, out float importance);
+                for (int i = 0; i < units.Count; i++)
+                    if (unit == units[i])
+                        tower = findedTowers[i];
+            }
+
             return unit != null;
         }
 
-        private bool CanKillCard(UnitCard attackCard, UnitCard card)
-        {
-            float damage = attackCard.Unit.GetStatistics(StatisticsType.Damage).Value;
-            float enemyArmor = card.Unit.GetStatistics(StatisticsType.Armor).Value;
-            float enemyHealth = card.Unit.GetStatistics(StatisticsType.Health).Value;
-
-            enemyHealth = enemyHealth - damage * (100 - enemyArmor) / 100;
-            return enemyHealth <= 0;
-        }
-
-        private bool CanDo(UnitCard unit) => _player.TurnPoints >= unit.TurnCost && unit.TurnCost < 4;
-
         private bool CanAttack(UnitCard findedCard, UnitCard currentCard, float priority, float currentPriority) => findedCard == null || currentCard.TurnCost < findedCard.TurnCost || (currentCard.TurnCost == findedCard.TurnCost && currentPriority > priority);
-
-        private float GetCardAttackPriority(UnitCard card) => card.Unit.Level + (100 - card.Unit.GetStatistics(StatisticsType.Health).Value) + (card.Unit.GetStatistics(StatisticsType.Damage).Value * 2) + (100 - card.Unit.GetStatistics(StatisticsType.Armor).Value);
 
         #endregion
 
         #region Movement
 
-        private bool TryFindCardWithMinTurnCost(out UnitCard card)
-        {
-            int minCost = int.MaxValue;
-            UnitCard minCostCard = null;
-
-            for (int i = 0; i < _player.Cards.Count; i++)
-            {
-                if (_player.TurnPoints >= _player.Cards[i].TurnCost)
-                {
-                    if (_player.Cards[i].TurnCost < minCost || (_player.Cards[i].TurnCost == minCost && Random.Range(0, 3) > 0))
-                    {
-                        minCost = _player.Cards[i].TurnCost;
-                        minCostCard = _player.Cards[i];
-                    }
-                }
-            }
-
-            card = minCostCard;
-            return minCostCard != null;
-        }
-
         private bool TryFindMovementCell(UnitCard card, out Cell movementCell)
         {
-            List<Cell> cells = new List<Cell>(9);
+            List<Cell> cells = Services.GetService<BoardBase>().GetMovementCells(_board, _player, card);
             List<Cell> cellsWithEnemies = new List<Cell>(1);
-
-            for (int vertical = 0; vertical < _board.Grid.GetLength(0); vertical++)
-                for (int horizontal = 0; horizontal < _board.Grid.GetLength(1); horizontal++)
-                    cells.Add(_board.Grid[vertical, horizontal]);
-
-            _board.FindCellOfCard(card, out int cardHorizontal, out int cardVertical);
-
-            for (int i = cells.Count - 1; i >= 0; i--)
-            {
-                _board.FindCellCoordinates(cells[i], out int cellHorizontal, out int cellVertical);
-                if (_board.HasWrongPosition(_player, cardHorizontal, cardVertical, cellHorizontal, cellVertical))
-                    cells.RemoveAt(i);
-            }
 
             for (int i = 0; i < cells.Count; i++)
             {
@@ -201,16 +179,13 @@ namespace Game.Board
                     Line enemyLine = cells[i].GetLine(_player.Type == PositionType.Top ? PositionType.Bottom : PositionType.Top);
                     Line playerLine = cells[i].GetLine(_player.Type);
 
-                    float currentPriority = 0;
+                    float enemyPriority = Services.GetService<BoardBase>().GetSumOfUnitsCondition(enemyLine.Cards, (unit) => Services.GetService<Formulas>().GetUnitAttackImportance(unit.Unit));
+                    float playerPriority = Services.GetService<BoardBase>().GetSumOfUnitsCondition(playerLine.Cards, (unit) => Services.GetService<Formulas>().GetUnitAttackImportance(unit.Unit));
+                    float linePriority = enemyPriority - playerPriority;
 
-                    for (int x = 0; x < playerLine.Cards.Count; x++)
-                        currentPriority -= GetCardAttackPriority(playerLine.Cards[x]);
-                    for (int x = 0; x < enemyLine.Cards.Count; x++)
-                        currentPriority += GetCardAttackPriority(enemyLine.Cards[x]);
-
-                    if (currentPriority > priority)
+                    if (linePriority > priority)
                     {
-                        priority = currentPriority;
+                        priority = linePriority;
                         cell = cellsWithEnemies[i];
                     }
                 }

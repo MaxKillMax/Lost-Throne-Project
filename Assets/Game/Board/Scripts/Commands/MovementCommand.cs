@@ -1,7 +1,7 @@
 using System;
 using DG.Tweening;
 
-namespace Game.Board
+namespace LostThrone.Board
 {
     public class MovementCommand : CardCommand
     {
@@ -24,16 +24,16 @@ namespace Game.Board
 
             Line endLine = _endCell.GetLine(_player.Type);
 
-            if (!_board.LineCanAcceptCard(endLine, unitCard))
+            if (!Services.GetService<BoardBase>().LineCanAcceptCard(_board, endLine, unitCard))
                 result = false;
 
-            Cell startCell = _board.FindCellOfCard(unitCard, out int startHorizontal, out int startVertical);
-            _board.FindCellCoordinates(_endCell, out int endHorizontal, out int endVertical);
+            Cell startCell = Services.GetService<BoardBase>().GetCardCell(_board, unitCard, out int startHorizontal, out int startVertical);
+            Services.GetService<BoardBase>().GetCellCoordinates(_board, _endCell, out int endHorizontal, out int endVertical);
 
-            if (startCell && _board.CellHaveEnemies(_player, startCell))
+            if (startCell && Services.GetService<BoardBase>().CellHaveEnemies(_player, startCell))
                 result = false;
 
-            if (_board.HasWrongPosition(_player, startHorizontal, startVertical, endHorizontal, endVertical))
+            if (Services.GetService<BoardBase>().HasWrongPosition(_board, _player, startHorizontal, startVertical, endHorizontal, endVertical))
                 result = false;
 
             if (result)
@@ -50,10 +50,10 @@ namespace Game.Board
             }
 
             if (startCell)
-                _board.RefreshLinePositions(startCell.GetLine(_player.Type));
+                Services.GetService<BoardBase>().RefreshLinePositions(startCell.GetLine(_player.Type));
             else
-                _board.RefreshLinePositions(_player.Hand);
-            _board.RefreshLinePositions(_endCell.GetLine(_player.Type));
+                Services.GetService<BoardBase>().RefreshLinePositions(_player.Hand);
+            Services.GetService<BoardBase>().RefreshLinePositions(_endCell.GetLine(_player.Type));
 
             Sequence sequence = DOTween.Sequence();
             sequence.AppendInterval(_board.RefreshLinesTime);

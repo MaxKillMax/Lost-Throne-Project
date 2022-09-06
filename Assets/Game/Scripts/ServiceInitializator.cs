@@ -1,12 +1,13 @@
 using UnityEngine;
 
-namespace Game
+namespace LostThrone
 {
     public class ServiceInitializator : MonoBehaviour
     {
         private void Awake()
         {
-            ServiceLocator.RegisterService(new BoardPositionsFinder());
+            Services.RegisterService(new BoardBase());
+            Services.RegisterService(new Formulas());
         }
     }
 }

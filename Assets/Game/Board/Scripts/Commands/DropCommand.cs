@@ -1,7 +1,7 @@
 using UnityEngine;
 using DG.Tweening;
 
-namespace Game.Board
+namespace LostThrone.Board
 {
     public class DropCommand : CardCommand
     {

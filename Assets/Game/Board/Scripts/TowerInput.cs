@@ -1,18 +1,15 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class TowerInput : MonoBehaviour
+namespace LostThrone.Board
 {
-    // Start is called before the first frame update
-    void Start()
+    public class TowerInput : MonoBehaviour
     {
-        
-    }
+        public void TryAttack(Board board, Player player, TowerCard towerCard)
+        {
+            Cell cell = Services.GetService<BoardBase>().GetTowerCell(board, towerCard, out int horizontal, out int vertical);
+            Line enemyLine = cell.GetLine(player.Type == PositionType.Top ? PositionType.Bottom : PositionType.Top);
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+            
+        }
     }
 }

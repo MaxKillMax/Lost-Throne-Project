@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Game.Board
+namespace LostThrone.Board
 {
     public class Cell : MonoBehaviour
     {

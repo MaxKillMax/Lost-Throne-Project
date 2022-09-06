@@ -1,18 +1,13 @@
 using System.Collections.Generic;
 using UnityEngine;
-using Cinemachine;
-using DG.Tweening;
 
-namespace Game.Board
+namespace LostThrone.Board
 {
     public class PlayerInput : MonoBehaviour
     {
         [SerializeField] private Player _player;
         [SerializeField] private Board _board;
         [SerializeField] private Camera _camera;
-        [SerializeField] private CinemachineVirtualCamera _virtualCamera;
-
-        private Cell _currentCameraCell;
 
         private UnitCard _selectedCard;
         private UnitCard _openedCard;
@@ -23,11 +18,6 @@ namespace Game.Board
 
         private float _minDragTime = 0.1f;
         private float _currentTime = 0.1f;
-
-        private void Start()
-        {
-            SetCameraTarget(_board.Grid[0, 1]);
-        }
 
         private void Update()
         {
@@ -113,9 +103,9 @@ namespace Game.Board
                 {
                     new DropCommand(_board, _player, _selectedCard).Execute();
                     if (_player.Hand.Cards.Contains(_selectedCard))
-                        _board.RefreshLinePositions(_player.Hand);
+                        Services.GetService<BoardBase>().RefreshLinePositions(_player.Hand);
                     else
-                        _board.RefreshLinePositions(_board.FindCellOfCard(_selectedCard, out int h, out int v).GetLine(_player.Type));
+                        Services.GetService<BoardBase>().RefreshLinePositions(Services.GetService<BoardBase>().GetCardCell(_board, _selectedCard, out int h, out int v).GetLine(_player.Type));
                 }
             }
             else if (_cardIsMoved)
@@ -129,30 +119,31 @@ namespace Game.Board
         private void MoveCamera(Direction direction)
         {
             Cell[,] grid = _board.Grid;
+            Cell currentCell = Services.GetService<BoardBase>().CurrentCameraCell;
 
             for (int x = 0; x < grid.GetLength(0); x++)
             {
                 for (int y = 0; y < grid.GetLength(1); y++)
                 {
-                    if (grid[x, y] == _currentCameraCell)
+                    if (grid[x, y] == currentCell)
                     {
                         switch (direction)
                         {
                             case Direction.Top:
                                 if (x + 1 < grid.GetLength(0))
-                                    SetCameraTarget(grid[x + 1, y]);
+                                    Services.GetService<BoardBase>().SetCameraTarget(_board.virtualCamera, grid[x + 1, y]);
                                 break;
                             case Direction.Right:
                                 if (y + 1 < grid.GetLength(1))
-                                    SetCameraTarget(grid[x, y + 1]);
+                                    Services.GetService<BoardBase>().SetCameraTarget(_board.virtualCamera, grid[x, y + 1]);
                             break;
                             case Direction.Bottom:
                                 if (x - 1 >= 0)
-                                    SetCameraTarget(grid[x - 1, y]);
+                                    Services.GetService<BoardBase>().SetCameraTarget(_board.virtualCamera, grid[x - 1, y]);
                                 break;
                             case Direction.Left:
                                 if (y - 1 >= 0)
-                                    SetCameraTarget(grid[x, y - 1]);
+                                    Services.GetService<BoardBase>().SetCameraTarget(_board.virtualCamera, grid[x, y - 1]);
                                 break;
                         }
 
@@ -211,9 +202,16 @@ namespace Game.Board
             UnitCard cashedCard = _selectedCard;
 
             if (cardFinded)
-                new AttackCommand(_board, _player, _selectedCard, card, () => { new DropCommand(_board, _player, cashedCard).Execute(); }).Execute();
+            {
+                if (card.Type == CardType.Unit)
+                    new AttackUnitCommand(_board, _player, _selectedCard, (UnitCard)card, () => { new DropCommand(_board, _player, cashedCard).Execute(); }).Execute();
+                else if (card.Type == CardType.Tower)
+                    new AttackTowerCommand(_board, _player, _selectedCard, (TowerCard)card, () => { new DropCommand(_board, _player, cashedCard).Execute(); }).Execute();
+            }
             else if (cellFinded)
+            {
                 new MovementCommand(_board, _player, _selectedCard, cell, () => { new DropCommand(_board, _player, cashedCard).Execute(); }).Execute();
+            }
 
             return cardFinded || cellFinded;
         }
@@ -235,12 +233,6 @@ namespace Game.Board
             }
 
             return default;
-        }
-
-        private void SetCameraTarget(Cell cell)
-        {
-            _currentCameraCell = cell;
-            _virtualCamera.Follow = _currentCameraCell.transform;
         }
 
         private Vector3 GetMouseWorldPosition() => _camera.ScreenToWorldPoint(Input.mousePosition);

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Game.OpenWorld
+namespace LostThrone.OpenWorld
 {
     public class Initialization : NativeComponent
     {

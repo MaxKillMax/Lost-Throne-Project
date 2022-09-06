@@ -1,5 +1,5 @@
 
-namespace Game
+namespace LostThrone
 {
     public abstract class Service
     {

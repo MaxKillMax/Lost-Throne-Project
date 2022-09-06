@@ -1,17 +1,20 @@
 using System;
 using System.Linq;
 using UnityEngine;
-using DG.Tweening;
-using Game.OpenWorld;
+using LostThrone.OpenWorld;
+using Cinemachine;
 
-namespace Game.Board
+namespace LostThrone.Board
 {
     public class Board : MonoBehaviour
     {
         public event Action<PositionType> OnTurnChanged;
 
+        [SerializeField] private CinemachineVirtualCamera _virtualCamera;
         [SerializeField] private GameObject _playerTurnUI;
         [SerializeField] private Cell[] _cells;
+
+        public CinemachineVirtualCamera virtualCamera => _virtualCamera;
 
         [SerializeField] private Player _player;
         [SerializeField] private Player _enemy;
@@ -22,15 +25,23 @@ namespace Game.Board
         [SerializeField] private TowerCard[] _playerTowers;
         [SerializeField] private TowerCard[] _enemyTowers;
 
-        [SerializeField] private int _turnPoints = 4;
-        [SerializeField] private int _cardsLimitInLine = 5;
+        public TowerCard[] PlayerTowers => _playerTowers;
+        public TowerCard[] EnemyTowers => _enemyTowers;
+
+        [SerializeField] private int _turnPoints = 5;
+        [SerializeField] private int _cardsLimitInLine = 3;
         [SerializeField] private int _requiredVerticalOffset = 1;
         [SerializeField] private int _maximumHorizontalOffset = 1;
-
         [SerializeField] private float _refreshLinesTime = 0.2f;
+        public int TurnPoints => _turnPoints;
+        public int CardsLimitInLine => _cardsLimitInLine;
+        public int RequiredVerticalOffset => _requiredVerticalOffset;
+        public int MaximumHorizontalOffset => _maximumHorizontalOffset;
         public float RefreshLinesTime => _refreshLinesTime;
 
         private Cell[,] _grid;
+
+        public Cell[] Cells => _cells;
         public Cell[,] Grid => _grid;
 
         private PositionType _currentTurn;
@@ -41,7 +52,7 @@ namespace Game.Board
 
         public bool GameInProgress { get; private set; }
 
-        private void Awake()
+        private void Start()
         {
             _grid = new Cell[,]
             {
@@ -55,6 +66,8 @@ namespace Game.Board
 
         public void StartBattle(bool playerIsFirst, BattleData playerData, BattleData enemyData)
         {
+            Services.GetService<BoardBase>().SetCameraTarget(_virtualCamera, Grid[0, 1]);
+
             _playerData = playerData;
             _enemyData = enemyData;
 
@@ -124,134 +137,6 @@ namespace Game.Board
                 _player.RefreshTurnPoints(_turnPoints);
             }
         }
-
-        #endregion
-
-        #region Card Positions
-
-        public bool TryGetTower(int horizontal, int vertical, out TowerCard tower)
-        {
-            tower = default;
-
-            if (vertical == PlayerLine || vertical == EnemyLine)
-            {
-                tower = vertical == PlayerLine ? _playerTowers[horizontal] : _enemyTowers[horizontal];
-                if (tower.IsDestroyed)
-                    return false;
-
-                return true;
-            }
-
-            return false;
-        }
-
-        public void RefreshLinePositions(Line line)
-        {
-            float middle = (line.Cards.Count - 1f) / 2;
-            for (int i = 0; i < line.Cards.Count; i++)
-                line.Cards[i].transform.DOLocalMove(new Vector3((i - middle), 0, 0), 0.2f);
-        }
-
-        public Cell FindCellOfCard(Card card, out int horizontal, out int vertical)
-        {
-            if (_playerTowers.Contains(card) || _enemyTowers.Contains(card))
-                return GetCellOfTower(card, out horizontal, out vertical);
-
-            PositionType type = card.Player.Type; 
-
-            for (int x = 0; x < _grid.GetLength(0); x++)
-            {
-                for (int y = 0; y < _grid.GetLength(1); y++)
-                {
-                    if (_grid[x, y].GetLine(type).Cards.Contains(card))
-                    {
-                        horizontal = y;
-                        vertical = x;
-                        return _grid[x, y];
-                    }
-                }
-            }
-
-            horizontal = 1;
-            vertical = card.Player.Type == PositionType.Bottom ? -1 : 3;
-            return null;
-        }
-
-        public Cell GetCellOfTower(Card card, out int horizontal, out int vertical)
-        {
-            TowerCard[] array;
-            if (_playerTowers.Contains(card))
-            {
-                array = _playerTowers;
-                vertical = PlayerLine;
-            }
-            else if (_enemyTowers.Contains(card))
-            {
-                array = _enemyTowers;
-                vertical = EnemyLine;
-            }
-            else
-            {
-                horizontal = default;
-                vertical = default;
-                return default;
-            }
-
-            for (int i = 0; i < array.Length; i++)
-            {
-                if (array[i] == card)
-                {
-                    horizontal = i;
-                    return Grid[horizontal, vertical];
-                }
-            }
-
-            horizontal = default;
-            return default;
-        }
-
-        public void FindCellCoordinates(Cell cell, out int horizontal, out int vertical)
-        {
-            for (int x = 0; x < _grid.GetLength(0); x++)
-            {
-                for (int y = 0; y < _grid.GetLength(1); y++)
-                {
-                    if (_grid[x, y] == cell)
-                    {
-                        horizontal = y;
-                        vertical = x;
-                        return;
-                    }
-                }
-            }
-
-            horizontal = -1;
-            vertical = -1;
-            return;
-        }
-
-        #endregion
-
-        #region Checks
-
-        public bool LineCanAcceptCard(Line line, UnitCard card) 
-            => !line.Cards.Contains(card) && line.Cards.Count < _cardsLimitInLine;
-
-        public bool CellHaveEnemies(Player invoker, Cell cell) 
-            => cell.GetLine(invoker.Type == PositionType.Top ? PositionType.Bottom : PositionType.Top).Cards.Count != 0;
-
-        public bool HasWrongPosition(Player invoker, int startHorizontal, int startVertical, int endHorizontal, int endVertical) 
-            => startVertical == endVertical || startVertical != endVertical + (invoker.Type == PositionType.Top ? _requiredVerticalOffset : -_requiredVerticalOffset)  || Mathf.Abs(endHorizontal - startHorizontal) > _maximumHorizontalOffset;
-
-        public bool HasWrongPosition(Player invoker, Cell startCell, Cell endCell)
-        {
-            FindCellCoordinates(startCell, out int startHorizontal, out int startVertical);
-            FindCellCoordinates(endCell, out int endHorizontal, out int endVertical);
-            return HasWrongPosition(invoker, startHorizontal, startVertical, endHorizontal, endVertical);
-        }
-
-        public bool CardTypesEquals(Card card1, Card card2) 
-            => card1.Player.Type == card2.Player.Type;
 
         #endregion
     }

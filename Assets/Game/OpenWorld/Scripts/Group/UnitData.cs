@@ -7,13 +7,13 @@ public class UnitData : ScriptableObject
     [SerializeField] private string _name;
     [SerializeField] private Sprite _icon;
 
-    [SerializeField] private Game.Board.CardRarity _cardRarity;
+    [SerializeField] private LostThrone.Board.CardRarity _cardRarity;
     [SerializeField] private Sprite _cardIcon;
 
     public string Name => _name;
     public Sprite Icon => _icon;
 
-    public Game.Board.CardRarity CardRarity => _cardRarity;
+    public LostThrone.Board.CardRarity CardRarity => _cardRarity;
     public Sprite CardIcon => _cardIcon;
 
     [SerializeField] private Statistics[] _statistics;

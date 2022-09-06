@@ -1,4 +1,4 @@
-namespace Game.OpenWorld
+namespace LostThrone.OpenWorld
 {
     public abstract class NativeComponent
     {

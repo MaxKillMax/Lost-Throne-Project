@@ -1,9 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Game.OpenWorld;
+using LostThrone.OpenWorld;
 
-namespace Game.Board
+namespace LostThrone.Board
 {
     public class BattleStarter : MonoBehaviour
     {
