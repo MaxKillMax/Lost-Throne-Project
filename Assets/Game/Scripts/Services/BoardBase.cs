@@ -16,7 +16,7 @@ namespace LostThrone
 
         public void DestroyUnitCard(Board.Board board, UnitCard card)
         {
-            Cell cell = board.Base.GetUnitCell(board, card, out int h, out int v);
+            Cell cell = board.Base.GetUnitCell(board, card);
             cell.GetLine(card.Player.Type).RemoveCard(card);
             board.Base.RefreshLinePositions(cell.GetLine(card.Player.Type));
             card.Unit.GetStatistics(StatisticsType.Health).SetValue(0);
@@ -120,10 +120,12 @@ namespace LostThrone
             return default;
         }
 
+        public Cell GetTowerCell(Board.Board board, BoardPlayer playerSide, Card card) => GetTowerCell(board, playerSide, card, out int h, out int v);
+
         public Cell GetUnitCell(Board.Board board, UnitCard card, out int horizontal, out int vertical)
         {
             PositionType type = card.Player.Type;
-            Cell cell = GetCell(board, out horizontal, out vertical, (findedCell, h, v) => findedCell.GetLine(type).Cards.Contains(card));
+            Cell cell = GetCellWithCondition(board, out horizontal, out vertical, (findedCell, h, v) => findedCell.GetLine(type).Cards.Contains(card));
 
             if (card.Player.Hand.Cards.Contains(card))
                 return card.Player.Hand.Cell;
@@ -131,18 +133,20 @@ namespace LostThrone
             return cell;
         }
 
+        public Cell GetUnitCell(Board.Board board, UnitCard card) => GetUnitCell(board, card, out int h, out int v);
+
         public void GetCellCoordinates(Board.Board board, Cell cell, out int horizontal, out int vertical)
         {
-            GetCell(board, out horizontal, out vertical, (findedCell, h, v) => findedCell == cell);
+            GetCellWithCondition(board, out horizontal, out vertical, (findedCell, h, v) => findedCell == cell);
         }
 
-        public Cell GetCell(Board.Board board, out int horizontal, out int vertical, Func<Cell, float, float, bool> conditionOfFinding)
+        public Cell GetCellWithCondition(Board.Board board, out int horizontal, out int vertical, Func<Cell, float, float, bool> condition)
         {
             for (int x = 0; x < board.Grid.GetLength(0); x++)
             {
                 for (int y = 0; y < board.Grid.GetLength(1); y++)
                 {
-                    if (conditionOfFinding.Invoke(board.Grid[x, y], y, x))
+                    if (condition.Invoke(board.Grid[x, y], y, x))
                     {
                         horizontal = y;
                         vertical = x;
@@ -155,6 +159,8 @@ namespace LostThrone
             vertical = -1;
             return default;
         }
+
+        public Cell GetCellWithCondition(Board.Board board, Func<Cell, float, float, bool> condition) => GetCellWithCondition(board, out int h, out int v, condition);
 
         public List<Cell> GetCells(Board.Board board, Func<Cell, float, float, bool> condition)
         {
@@ -244,6 +250,8 @@ namespace LostThrone
             return unitCard;
         }
 
+        public UnitCard GetUnitWithBestCondition(List<UnitCard> units, bool moreIsBetter, Func<UnitCard, float> condition) => GetUnitWithBestCondition(units, moreIsBetter, condition, out float value);
+
         public List<UnitCard> GetUnitsWithBestCondition(List<UnitCard> units, bool moreIsBetter, Func<UnitCard, float> condition)
         {
             List<UnitCard> unitCards = new List<UnitCard>(1);
@@ -308,9 +316,9 @@ namespace LostThrone
 
         public bool PlayerCanMove(Board.Board board, BoardPlayer player) => player.Type == board.TurnPosition && board.GameState == BoardState.InProcess;
 
-        public bool UnitCanAttack(Board.Board board, UnitCard unit, BoardPlayer player) => player.TurnPoints >= unit.TurnCost && GetUnitCell(board, unit, out int h, out int v).GetLine(player.Type == PositionType.Bottom ? PositionType.Top : PositionType.Bottom).Cards.Count > 0;
+        public bool UnitCanAttack(Board.Board board, UnitCard unit, BoardPlayer player) => player.TurnPoints >= unit.TurnCost && GetUnitCell(board, unit).GetLine(player.Type == PositionType.Bottom ? PositionType.Top : PositionType.Bottom).Cards.Count > 0;
 
-        public bool UnitCanMove(Board.Board board, UnitCard unit, BoardPlayer player) => player.TurnPoints >= unit.TurnCost && GetUnitCell(board, unit, out int h, out int v).GetLine(player.Type == PositionType.Bottom ? PositionType.Top : PositionType.Bottom).Cards.Count == 0;
+        public bool UnitCanMove(Board.Board board, UnitCard unit, BoardPlayer player) => player.TurnPoints >= unit.TurnCost && GetUnitCell(board, unit).GetLine(player.Type == PositionType.Bottom ? PositionType.Top : PositionType.Bottom).Cards.Count == 0;
 
         public bool LineCanAcceptCard(Board.Board board, Line line, UnitCard card)
             => !line.Cards.Contains(card) && line.Cards.Count < board.CardsLimitInLine;

@@ -42,22 +42,19 @@ namespace LostThrone.Board
             if (cards.Count == 0)
                 return false;
 
-            UnitCard card = _board.Base
-                .GetUnitWithBestCondition(cards, true, (unitCard) => _formulas
-                .GetUnitAttackImportance(_board.Base
-                .GetUnitWithBestAttackImportance(_board.Base
-                .GetUnitCell(_board, unitCard, out int h, out int v)
-                .GetLine(_enemy.Type).Cards, out float importance).Unit), out float value);
-
-            UnitCard enemyCard = (UnitCard)_board.Base
-                .GetUnitWithBestAttackImportance(_board.Base
-                .GetUnitCell(_board, unitCard, out int h, out int v)
-                .GetLine(_enemy.Type).Cards, out float importance);
+            UnitCard card = _board.Base.GetUnitWithBestCondition(cards, true, GetUnitAttackImportance);
+            UnitCard enemyCard = GetEnemyUnitWithBestAttackImportance(card);
 
             unitCard = card;
             enemyUnitCard = enemyCard;
             return true;
         }
+
+        private float GetUnitAttackImportance(UnitCard unitCard)
+            => _formulas.GetUnitAttackImportance(_board.Base.GetUnitWithBestAttackImportance(_board.Base.GetUnitCell(_board, unitCard).GetLine(_player.Type).Cards, out float importance).Unit);
+
+        private UnitCard GetEnemyUnitWithBestAttackImportance(UnitCard unitCard)
+            => (UnitCard)_board.Base.GetUnitWithBestAttackImportance(_board.Base.GetUnitCell(_board, unitCard).GetLine(_enemy.Type).Cards, out float importance);
 
         private bool TryGetEnemyTowerCard(ref UnitCard unitCard, out TowerCard enemyTowerCard)
         {
@@ -71,8 +68,8 @@ namespace LostThrone.Board
             List<UnitCard> towerCards = new List<UnitCard>(1);
             for (int i = 0; i < _enemy.Towers.Count; i++)
             {
-                Cell towerCell = _board.Base.GetTowerCell(_board, _enemy, _enemy.Towers[i], out int h, out int v);
-                towerCards.Add(_board.Base.GetUnitWithCondition(cards, (unitCard) => _board.Base.GetUnitCell(_board, unitCard, out int h, out int v) == towerCell));
+                Cell towerCell = _board.Base.GetTowerCell(_board, _enemy, _enemy.Towers[i]);
+                towerCards.Add(_board.Base.GetUnitWithCondition(cards, (unitCard) => _board.Base.GetUnitCell(_board, unitCard) == towerCell));
             }
 
             if (towerCards.Count == 0)

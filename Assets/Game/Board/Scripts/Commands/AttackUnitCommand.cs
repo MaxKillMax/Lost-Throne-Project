@@ -25,8 +25,8 @@ namespace LostThrone.Board
             if (_board.Base.CardTypesEquals(unitCard, _enemy))
                 result = false;
 
-            Cell cardCell = _board.Base.GetUnitCell(_board, unitCard, out int horizontal, out int vertical);
-            Cell enemyCell = _board.Base.GetUnitCell(_board, _enemy, out int enemyHorizontal, out int enemyVertical);
+            Cell cardCell = _board.Base.GetUnitCell(_board, unitCard);
+            Cell enemyCell = _board.Base.GetUnitCell(_board, _enemy);
 
             if (cardCell != enemyCell)
                 result = false;
