@@ -8,7 +8,7 @@ namespace LostThrone.Board
         protected event Action _onAnimationEnded;
         protected Cell _endCell;
 
-        public MovementCommand(Board board, Player player, Card card, Cell endCell, Action onAnimationEnded = null) : base(board, player, card)
+        public MovementCommand(Board board, BoardPlayer player, Card card, Cell endCell, Action onAnimationEnded = null) : base(board, player, card)
         {
             _endCell = endCell;
             _onAnimationEnded = onAnimationEnded;
@@ -27,7 +27,7 @@ namespace LostThrone.Board
             if (!Services.GetService<BoardBase>().LineCanAcceptCard(_board, endLine, unitCard))
                 result = false;
 
-            Cell startCell = Services.GetService<BoardBase>().GetCardCell(_board, unitCard, out int startHorizontal, out int startVertical);
+            Cell startCell = Services.GetService<BoardBase>().GetUnitCell(_board, unitCard, out int startHorizontal, out int startVertical);
             Services.GetService<BoardBase>().GetCellCoordinates(_board, _endCell, out int endHorizontal, out int endVertical);
 
             if (startCell && Services.GetService<BoardBase>().CellHaveEnemies(_player, startCell))

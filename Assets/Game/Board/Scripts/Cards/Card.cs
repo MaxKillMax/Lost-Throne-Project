@@ -1,60 +1,93 @@
 using UnityEngine;
 using UnityEngine.UI;
+using NaughtyAttributes;
 using TMPro;
-using LostThrone.OpenWorld;
 
 namespace LostThrone.Board
 {
     public abstract class Card : MonoBehaviour
     {
-        [SerializeField] protected TMP_Text _damageText;
-        [SerializeField] protected TMP_Text _armorText;
-        [SerializeField] protected TMP_Text _healthText;
+        [SerializeField, Foldout("Main")] 
+        protected TMP_Text _titleText;
+        [SerializeField, Foldout("Main")] 
+        protected Image _iconImage;
+        [SerializeField, Foldout("Main")]
+        protected Canvas _canvas;
 
-        [Space]
+        [SerializeField, Foldout("Values")] 
+        protected TMP_Text _damageText;
+        [SerializeField, Foldout("Values")] 
+        protected TMP_Text _armorText;
+        [SerializeField, Foldout("Values")] 
+        protected TMP_Text _healthText;
 
-        [SerializeField] protected TMP_Text _titleText;
-        [SerializeField] protected Image _iconImage;
+        [SerializeField, Foldout("Modificators")] 
+        protected Transform _modificatorsParent;
+        [SerializeField, Foldout("Modificators")] 
+        protected GameObject _modificatorPrefab;
 
-        [Space]
+        [SerializeField, Foldout("Additionals")] 
+        protected TMP_Text _levelText;
+        [SerializeField, Foldout("Additionals")] 
+        protected TMP_Text _rarityText;
 
-        [SerializeField] protected Transform _modificatorsParent;
-        [SerializeField] protected GameObject _modificatorPrefab;
+        [SerializeField, Foldout("Info Panel")] 
+        protected GameObject _infoObject;
 
-        [Space]
-
-        [SerializeField] protected TMP_Text _turnCostText;
-        [SerializeField] protected TMP_Text _levelText;
-        [SerializeField] protected TMP_Text _rarityText;
-
-        [Space]
-
-        [SerializeField] protected GameObject _infoObject;
-        [SerializeField] protected Canvas _canvas;
-
+        protected BoardPlayer _player;
         protected Unit _unit;
-        public Unit Unit => _unit;
 
-        protected Player _player;
-        public Player Player => _player;
+        public BoardPlayer Player => _player;
+        public Unit Unit => _unit;
 
         public abstract CardType Type { get; }
 
-        public void OpenInfoPanel()
+        public void OpenInfoPanel() => _infoObject.SetActive(true);
+
+        public void CloseInfoPanel() => _infoObject.SetActive(false);
+
+        protected void InitializeUnit(BoardPlayer player, Unit unit)
         {
-            _infoObject.SetActive(true);
+            _player = player;
+            _unit = unit;
+
+            _unit.GetStatistics(StatisticsType.Damage).OnValueChanged += RefreshStatistics;
+            _unit.GetStatistics(StatisticsType.Armor).OnValueChanged += RefreshStatistics;
+            _unit.GetStatistics(StatisticsType.Health).OnValueChanged += RefreshStatistics;
+
+            RefreshUI();
         }
 
-        public void CloseInfoPanel()
+        private void OnDestroy()
         {
-            _infoObject.SetActive(false);
+            _unit.GetStatistics(StatisticsType.Damage).OnValueChanged -= RefreshStatistics;
+            _unit.GetStatistics(StatisticsType.Armor).OnValueChanged -= RefreshStatistics;
+            _unit.GetStatistics(StatisticsType.Health).OnValueChanged -= RefreshStatistics;
         }
 
-        public abstract void DestroyCard();
+        protected virtual void RefreshUI()
+        {
+            _titleText.text = _unit.Name;
+            _iconImage.sprite = _unit.CardIcon;
+            _levelText.text = _unit.Level.ToString();
+            _rarityText.text = _unit.CardRarity.ToString();
+
+            RefreshStatistics();
+        }
+
+        protected virtual void RefreshStatistics()
+        {
+            _damageText.text = _unit.GetStatistics(StatisticsType.Damage).Value.ToString("N0");
+            _armorText.text = _unit.GetStatistics(StatisticsType.Armor).Value.ToString("N0");
+            _healthText.text = _unit.GetStatistics(StatisticsType.Health).Value.ToString("N0");
+        }
 
         public abstract void GetDamage(float value);
 
-        protected abstract void RefreshUI();
+        /// <summary>
+        /// Need to use BoardBase to destroy the card!
+        /// </summary>
+        public abstract void DestroyCard();
     }
 
     public enum CardType

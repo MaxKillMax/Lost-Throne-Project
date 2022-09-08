@@ -1,36 +1,23 @@
+using UnityEngine;
 
 namespace LostThrone.Board
 {
     public class TowerCard : Card
     {
+        private Board _board;
+        private Cell _cell;
+
         public override CardType Type => CardType.Tower;
 
-        protected Cell _cell;
-
-        public bool IsDestroyed => !gameObject.activeSelf;
-
-        public void InitializeTower(Player player, Cell cell, OpenWorld.Unit unit)
+        public void InitializeTower(Board board, BoardPlayer player, Cell cell, Unit unit)
         {
+            _canvas.worldCamera = Camera.current;
             gameObject.SetActive(true);
-            _player = player;
-            _unit = unit;
+
+            _board = board;
             _cell = cell;
 
-            _unit.GetStatistics(StatisticsType.Damage).OnValueChanged += RefreshStatistics;
-            _unit.GetStatistics(StatisticsType.Armor).OnValueChanged += RefreshStatistics;
-            _unit.GetStatistics(StatisticsType.Health).OnValueChanged += RefreshStatistics;
-
-            RefreshUI();
-        }
-
-        private void OnDestroy()
-        {
-            if (_unit != null)
-            {
-                _unit.GetStatistics(StatisticsType.Damage).OnValueChanged -= RefreshStatistics;
-                _unit.GetStatistics(StatisticsType.Armor).OnValueChanged -= RefreshStatistics;
-                _unit.GetStatistics(StatisticsType.Health).OnValueChanged -= RefreshStatistics;
-            }
+            InitializeUnit(player, unit);
         }
 
         public override void GetDamage(float value)
@@ -39,30 +26,9 @@ namespace LostThrone.Board
             _unit.GetStatistics(StatisticsType.Health).SetValue(health);
 
             if (health <= 0)
-                DestroyCard();
+                Services.GetService<BoardBase>().DestroyTowerCard(_board, this);
         }
 
-        public override void DestroyCard()
-        {
-            _unit.GetStatistics(StatisticsType.Health).SetValue(0);
-            gameObject.SetActive(false);
-        }
-
-        protected override void RefreshUI()
-        {
-            _titleText.text = _unit.Name;
-            _iconImage.sprite = _unit.CardIcon;
-            _levelText.text = _unit.Level.ToString();
-            _rarityText.text = _unit.CardRarity.ToString();
-
-            RefreshStatistics();
-        }
-
-        protected void RefreshStatistics()
-        {
-            _damageText.text = _unit.GetStatistics(StatisticsType.Damage).Value.ToString("N0");
-            _armorText.text = _unit.GetStatistics(StatisticsType.Armor).Value.ToString("N0");
-            _healthText.text = _unit.GetStatistics(StatisticsType.Health).Value.ToString("N0");
-        }
+        public override void DestroyCard() => gameObject.SetActive(false);
     }
 }

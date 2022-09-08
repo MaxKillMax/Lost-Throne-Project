@@ -5,7 +5,7 @@ namespace LostThrone.Board
 {
     public class DropCommand : CardCommand
     {
-        public DropCommand(Board board, Player player, UnitCard unitCard) : base(board, player, unitCard)
+        public DropCommand(Board board, BoardPlayer player, UnitCard unitCard) : base(board, player, unitCard)
         {
 
         }

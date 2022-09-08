@@ -1,36 +1,29 @@
 using UnityEngine;
+using NaughtyAttributes;
+using TMPro;
 
 namespace LostThrone.Board
 {
     public class UnitCard : Card
     {
+        [SerializeField, Foldout("Additionals")]
+        protected TMP_Text _turnCostText;
+
         public override CardType Type => CardType.Unit;
+
+        private Board _board;
 
         private int _turnCost;
         public int TurnCost => _turnCost;
 
-        public void InitializeCard(Player player, OpenWorld.Unit unit, Camera camera)
+        public void InitializeCard(Board board, BoardPlayer player, Unit unit)
         {
-            _player = player;
-            _unit = unit;
-            _canvas.worldCamera = camera;
+            _canvas.worldCamera = Camera.current;
 
-            _unit.GetStatistics(StatisticsType.Damage).OnValueChanged += RefreshStatistics;
-            _unit.GetStatistics(StatisticsType.Armor).OnValueChanged += RefreshStatistics;
-            _unit.GetStatistics(StatisticsType.Health).OnValueChanged += RefreshStatistics;
+            _board = board;
 
             RefreshCard();
-            RefreshUI();
-        }
-
-        private void OnDestroy()
-        {
-            if (_unit != null)
-            {
-                _unit.GetStatistics(StatisticsType.Damage).OnValueChanged -= RefreshStatistics;
-                _unit.GetStatistics(StatisticsType.Armor).OnValueChanged -= RefreshStatistics;
-                _unit.GetStatistics(StatisticsType.Health).OnValueChanged -= RefreshStatistics;
-            }
+            InitializeUnit(player, unit);
         }
 
         public void DoubleCost()
@@ -51,31 +44,9 @@ namespace LostThrone.Board
             _unit.GetStatistics(StatisticsType.Health).SetValue(health);
 
             if (health <= 0)
-                DestroyCard();
+                Services.GetService<BoardBase>().DestroyUnitCard(_board, this);
         }
 
-        public override void DestroyCard()
-        {
-            _unit.GetStatistics(StatisticsType.Health).SetValue(0);
-            _player.DestroyCard(this);
-        }
-
-        protected override void RefreshUI()
-        {
-            _titleText.text = _unit.Name;
-            _iconImage.sprite = _unit.CardIcon;
-            _turnCostText.text = _turnCost.ToString();
-            _levelText.text = _unit.Level.ToString();
-            _rarityText.text = _unit.CardRarity.ToString();
-
-            RefreshStatistics();
-        }
-
-        protected void RefreshStatistics()
-        {
-            _damageText.text = _unit.GetStatistics(StatisticsType.Damage).Value.ToString("N0");
-            _armorText.text = _unit.GetStatistics(StatisticsType.Armor).Value.ToString("N0");
-            _healthText.text = _unit.GetStatistics(StatisticsType.Health).Value.ToString("N0");
-        }
+        public override void DestroyCard() => Destroy(gameObject);
     }
 }

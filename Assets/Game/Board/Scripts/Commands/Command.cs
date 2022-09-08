@@ -6,11 +6,11 @@ namespace LostThrone.Board
         protected bool _executed;
 
         protected Board _board;
-        protected Player _player;
+        protected BoardPlayer _player;
 
         public bool Executed => _executed;
 
-        public Command(Board board, Player player)
+        public Command(Board board, BoardPlayer player)
         {
             _board = board;
             _player = player;
@@ -23,7 +23,7 @@ namespace LostThrone.Board
     {
         protected Card _card;
 
-        public CardCommand(Board board, Player player, Card card) : base(board, player)
+        public CardCommand(Board board, BoardPlayer player, Card card) : base(board, player)
         {
             _card = card;
         }

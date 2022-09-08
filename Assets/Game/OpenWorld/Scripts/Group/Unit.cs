@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using UnityEngine;
 
-namespace LostThrone.OpenWorld
+namespace LostThrone
 {
     public class Unit
     {
@@ -12,7 +12,7 @@ namespace LostThrone.OpenWorld
         private bool _attributesAreNotNeeded;
         public bool AttributesAreNotNeeded => _attributesAreNotNeeded;
 
-        private LostThrone.Board.CardRarity _cardRarity;
+        private Board.CardRarity _cardRarity;
         private Sprite _cardIcon;
 
         private Statistics[] _statistics;
@@ -24,7 +24,7 @@ namespace LostThrone.OpenWorld
         public string Name => _name;
         public Sprite Icon => _icon;
 
-        public LostThrone.Board.CardRarity CardRarity => _cardRarity;
+        public Board.CardRarity CardRarity => _cardRarity;
         public Sprite CardIcon => _cardIcon;
 
         public int Level { get { int level = 0; for (int i = 0; i < _attributes.Length; i++) level += (int)_attributes[i].value; return level; } }

@@ -8,7 +8,7 @@ namespace LostThrone.Board
     {
         protected event Action _onAnimationEnded;
 
-        public PickupCommand(Board board, Player player, UnitCard unitCard, Action onAnimationEnded = null) : base(board, player, unitCard)
+        public PickupCommand(Board board, BoardPlayer player, UnitCard unitCard, Action onAnimationEnded = null) : base(board, player, unitCard)
         {
             _onAnimationEnded = onAnimationEnded;
         }

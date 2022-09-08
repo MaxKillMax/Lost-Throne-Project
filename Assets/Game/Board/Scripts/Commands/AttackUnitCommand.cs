@@ -10,7 +10,7 @@ namespace LostThrone.Board
         protected event Action _onAnimationEnded;
         protected UnitCard _enemy;
 
-        public AttackUnitCommand(Board board, Player player, Card card, UnitCard enemy, Action onAnimationEnded = null) : base(board, player, card)
+        public AttackUnitCommand(Board board, BoardPlayer player, Card card, UnitCard enemy, Action onAnimationEnded = null) : base(board, player, card)
         {
             _enemy = enemy;
             _onAnimationEnded = onAnimationEnded;
@@ -27,8 +27,8 @@ namespace LostThrone.Board
             if (Services.GetService<BoardBase>().CardTypesEquals(unitCard, _enemy))
                 result = false;
 
-            Cell cardCell = Services.GetService<BoardBase>().GetCardCell(_board, unitCard, out int horizontal, out int vertical);
-            Cell enemyCell = Services.GetService<BoardBase>().GetCardCell(_board, _enemy, out int enemyHorizontal, out int enemyVertical);
+            Cell cardCell = Services.GetService<BoardBase>().GetUnitCell(_board, unitCard, out int horizontal, out int vertical);
+            Cell enemyCell = Services.GetService<BoardBase>().GetUnitCell(_board, _enemy, out int enemyHorizontal, out int enemyVertical);
 
             if (cardCell != enemyCell)
                 result = false;
