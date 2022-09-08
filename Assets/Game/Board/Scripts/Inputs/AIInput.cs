@@ -167,7 +167,7 @@ namespace LostThrone.Board
         {
             Debug.Log("Attack towers: " + _selectedCard + " : " + enemyTowerCard);
             new PickupCommand(_board, _player, _selectedCard, () =>
-            new AttackTowerCommand(_board, _player, _selectedCard, enemyTowerCard, () =>
+            new AttackTowerCommand(_board, _player, _selectedCard, _enemy, enemyTowerCard, () =>
             new DropCommand(_board, _player, _selectedCard).Execute()).Execute()).Execute();
         }
 

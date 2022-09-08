@@ -5,13 +5,11 @@ namespace LostThrone.Board
 {
     public class MovementCommand : CardCommand
     {
-        protected event Action _onAnimationEnded;
         protected Cell _endCell;
 
-        public MovementCommand(Board board, BoardPlayer player, Card card, Cell endCell, Action onAnimationEnded = null) : base(board, player, card)
+        public MovementCommand(Board board, BoardPlayer player, Card card, Cell endCell, Action onCommandEnded = null) : base(board, player, card, onCommandEnded)
         {
             _endCell = endCell;
-            _onAnimationEnded = onAnimationEnded;
         }
 
         public override void Execute()
@@ -24,41 +22,63 @@ namespace LostThrone.Board
 
             Line endLine = _endCell.GetLine(_player.Type);
 
-            if (!Services.GetService<BoardBase>().LineCanAcceptCard(_board, endLine, unitCard))
+            if (!_board.Base.LineCanAcceptCard(_board, endLine, unitCard))
                 result = false;
 
-            Cell startCell = Services.GetService<BoardBase>().GetUnitCell(_board, unitCard, out int startHorizontal, out int startVertical);
-            Services.GetService<BoardBase>().GetCellCoordinates(_board, _endCell, out int endHorizontal, out int endVertical);
+            Cell startCell = _board.Base.GetUnitCell(_board, unitCard, out int startHorizontal, out int startVertical);
+            _board.Base.GetCellCoordinates(_board, _endCell, out int endHorizontal, out int endVertical);
 
-            if (startCell && Services.GetService<BoardBase>().CellHaveEnemies(_player, startCell))
+            if (startCell && _board.Base.CellHaveEnemies(_player, startCell))
                 result = false;
 
-            if (Services.GetService<BoardBase>().HasWrongPosition(_board, _player, startHorizontal, startVertical, endHorizontal, endVertical))
+            if (_board.Base.HasWrongPosition(_board, _player, startHorizontal, startVertical, endHorizontal, endVertical))
                 result = false;
 
             if (result)
             {
+                _player.RemoveTurnPoints(unitCard.TurnCost);
+                unitCard.DoubleCost();
+
                 if (!startCell)
+                {
                     _player.Hand.RemoveCard(unitCard);
+                }
                 else
+                {
                     startCell.GetLine(_player.Type).RemoveCard(unitCard);
+                    _board.Base.RefreshLinePositions(startCell.GetLine(_player.Type));
+                }
 
                 _endCell.GetLine(_player.Type).AddCard(unitCard);
-                _player.UseCard(unitCard);
+                _board.Base.RefreshLinePositions(_endCell.GetLine(_player.Type));
 
                 unitCard.transform.SetParent(endLine.Parent);
+
+                Sequence sequence = DOTween.Sequence();
+                sequence.AppendInterval(_board.RefreshLinesTime);
+                sequence.AppendCallback(() => EndExecute(startCell));
+            }
+            else
+            {
+                if (startCell)
+                    _board.Base.RefreshLinePositions(startCell.GetLine(_player.Type));
             }
 
             if (startCell)
-                Services.GetService<BoardBase>().RefreshLinePositions(startCell.GetLine(_player.Type));
+                _board.Base.RefreshLinePositions(startCell.GetLine(_player.Type));
             else
-                Services.GetService<BoardBase>().RefreshLinePositions(_player.Hand);
-            Services.GetService<BoardBase>().RefreshLinePositions(_endCell.GetLine(_player.Type));
+                _board.Base.RefreshLinePositions(_player.Hand);
 
-            Sequence sequence = DOTween.Sequence();
-            sequence.AppendInterval(_board.RefreshLinesTime);
-            sequence.AppendCallback(() => { _onAnimationEnded?.Invoke(); });
+            _board.Base.RefreshLinePositions(_endCell.GetLine(_player.Type));
+
             _executed = result;
+        }
+
+        private void EndExecute(Cell startCell)
+        {
+            _board.Base.RefreshLinePositions(startCell.GetLine(_player.Type));
+            _board.Base.RefreshLinePositions(_endCell.GetLine(_player.Type));
+            _onCommandExecuted?.Invoke();
         }
     }
 }

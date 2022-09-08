@@ -118,7 +118,7 @@ namespace LostThrone.Board
             if (_formulas.TryGetObjectInMousePosition(out UnitCard unitCard, (unitCard) => unitCard.Player.Type == _board.EnemyPositionType))
                 new AttackUnitCommand(_board, _player, _selectedCard, unitCard, () => { new DropCommand(_board, _player, cachedCard).Execute(); }).Execute();
             else if (_formulas.TryGetObjectInMousePosition(out TowerCard towerCard, (towerCard) => towerCard.Player.Type == _board.EnemyPositionType))
-                new AttackTowerCommand(_board, _player, _selectedCard, towerCard, () => { new DropCommand(_board, _player, cachedCard).Execute(); }).Execute();
+                new AttackTowerCommand(_board, _player, _selectedCard, _enemy, towerCard, () => { new DropCommand(_board, _player, cachedCard).Execute(); }).Execute();
             else if (_formulas.TryGetObjectInMousePosition(out Cell cell))
                 new MovementCommand(_board, _player, _selectedCard, cell, () => { new DropCommand(_board, _player, cachedCard).Execute(); }).Execute();
         }

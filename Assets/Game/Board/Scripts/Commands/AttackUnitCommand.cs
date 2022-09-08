@@ -7,13 +7,11 @@ namespace LostThrone.Board
 {
     public class AttackUnitCommand : CardCommand
     {
-        protected event Action _onAnimationEnded;
         protected UnitCard _enemy;
 
-        public AttackUnitCommand(Board board, BoardPlayer player, Card card, UnitCard enemy, Action onAnimationEnded = null) : base(board, player, card)
+        public AttackUnitCommand(Board board, BoardPlayer player, Card card, UnitCard enemy, Action onCommandEnded = null) : base(board, player, card, onCommandEnded)
         {
             _enemy = enemy;
-            _onAnimationEnded = onAnimationEnded;
         }
 
         public override void Execute()
@@ -24,11 +22,11 @@ namespace LostThrone.Board
             if (unitCard.TurnCost > _card.Player.TurnPoints || _player.State != PlayerState.Attack || _player.TurnPoints <= 0)
                 result = false;
 
-            if (Services.GetService<BoardBase>().CardTypesEquals(unitCard, _enemy))
+            if (_board.Base.CardTypesEquals(unitCard, _enemy))
                 result = false;
 
-            Cell cardCell = Services.GetService<BoardBase>().GetUnitCell(_board, unitCard, out int horizontal, out int vertical);
-            Cell enemyCell = Services.GetService<BoardBase>().GetUnitCell(_board, _enemy, out int enemyHorizontal, out int enemyVertical);
+            Cell cardCell = _board.Base.GetUnitCell(_board, unitCard, out int horizontal, out int vertical);
+            Cell enemyCell = _board.Base.GetUnitCell(_board, _enemy, out int enemyHorizontal, out int enemyVertical);
 
             if (cardCell != enemyCell)
                 result = false;
@@ -36,28 +34,27 @@ namespace LostThrone.Board
             if (result)
             {
                 _enemy.GetDamage(unitCard.Unit.GetStatistics(StatisticsType.Damage).Value);
-                _player.UseCard(unitCard);
 
-                _enemy.transform.position = new Vector3(_enemy.transform.position.x, _enemy.transform.position.y, -1);
+                _player.RemoveTurnPoints(unitCard.TurnCost);
+                unitCard.DoubleCost();
+
                 Sequence sequence = DOTween.Sequence();
                 sequence.Append(unitCard.transform.DOMove(new Vector3(_enemy.transform.position.x, _enemy.transform.position.y, unitCard.transform.position.z), 0.2f));
-                sequence.AppendCallback(() => { if (_enemy) _enemy.transform.DOShakeScale(0.2f); RefreshLine(cardCell); _onAnimationEnded?.Invoke(); });
+                sequence.AppendCallback(() => EndExecute(cardCell));
                 sequence.Play();
             }
             else
             {
-                RefreshLine(cardCell);
+                _board.Base.RefreshLinePositions(cardCell.GetLine(_player.Type));
             }
 
             _executed = result;
         }
 
-        private void RefreshLine(Cell cardCell)
+        private void EndExecute(Cell cardCell)
         {
-            if (cardCell)
-                Services.GetService<BoardBase>().RefreshLinePositions(cardCell.GetLine(_player.Type));
-            else
-                Services.GetService<BoardBase>().RefreshLinePositions(_player.Hand);
+            _board.Base.RefreshLinePositions(cardCell.GetLine(_player.Type));
+            _onCommandExecuted?.Invoke();
         }
     }
 }

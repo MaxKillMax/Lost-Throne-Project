@@ -6,23 +6,17 @@ namespace LostThrone.Board
 {
     public class PickupCommand : CardCommand
     {
-        protected event Action _onAnimationEnded;
-
-        public PickupCommand(Board board, BoardPlayer player, UnitCard unitCard, Action onAnimationEnded = null) : base(board, player, unitCard)
-        {
-            _onAnimationEnded = onAnimationEnded;
-        }
+        public PickupCommand(Board board, BoardPlayer player, UnitCard unitCard, Action onCommandEnded = null) : base(board, player, unitCard, onCommandEnded) { }
 
         public override void Execute()
         {
-            bool result = true;
+            _card.transform.position = new Vector3(_card.transform.position.x, _card.transform.position.y, -1);
 
             Sequence sequence = DOTween.Sequence();
-            _card.transform.position = new Vector3(_card.transform.position.x, _card.transform.position.y, -1);
             sequence.Append(_card.transform.DOScale(1.5f, 0.2f));
-            sequence.AppendCallback(() => _onAnimationEnded?.Invoke());
+            sequence.AppendCallback(() => _onCommandExecuted?.Invoke());
 
-            _executed = result;
+            _executed = true;
         }
     }
 }

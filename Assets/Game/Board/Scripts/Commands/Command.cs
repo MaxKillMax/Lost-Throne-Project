@@ -1,8 +1,11 @@
+using System;
 
 namespace LostThrone.Board
 {
     public abstract class Command
     {
+        protected Action _onCommandExecuted;
+
         protected bool _executed;
 
         protected Board _board;
@@ -10,10 +13,11 @@ namespace LostThrone.Board
 
         public bool Executed => _executed;
 
-        public Command(Board board, BoardPlayer player)
+        public Command(Board board, BoardPlayer player, Action onCommandEnded)
         {
             _board = board;
             _player = player;
+            _onCommandExecuted = onCommandEnded;
         }
 
         public abstract void Execute();
@@ -23,7 +27,7 @@ namespace LostThrone.Board
     {
         protected Card _card;
 
-        public CardCommand(Board board, BoardPlayer player, Card card) : base(board, player)
+        public CardCommand(Board board, BoardPlayer player, Card card, Action onCommandEnded) : base(board, player, onCommandEnded)
         {
             _card = card;
         }
