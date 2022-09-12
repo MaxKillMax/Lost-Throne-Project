@@ -1,5 +1,5 @@
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace LostThrone.OpenWorld
@@ -13,11 +13,11 @@ namespace LostThrone.OpenWorld
         private void Awake()
         {
             _nativeComponents = new List<NativeComponent>()
-        {
-            new Initialization(),
-            new Movement(),
-            new Improver()
-        };
+            {
+                new Initialization(),
+                new Movement(),
+                new Improver()
+            };
 
             foreach (NativeComponent native in _nativeComponents)
                 native.Initialize(this, _data);
@@ -32,8 +32,10 @@ namespace LostThrone.OpenWorld
         private void Update()
         {
             foreach (NativeComponent native in _nativeComponents)
+            {
                 if (native.CanUpdate)
                     native.Update();
+            }
         }
 
         public T GetNative<T>() where T : NativeComponent => _nativeComponents.First(n => n.GetType() == typeof(T)) as T;
@@ -42,7 +44,7 @@ namespace LostThrone.OpenWorld
 
         public bool AddNative<T>(T t, bool initialize = true) where T : NativeComponent
         {
-            if (_nativeComponents.First(n => n.GetType() == typeof(T)) as T != null)
+            if ((_nativeComponents.First(n => n.GetType() == typeof(T)) as T) != null)
                 return false;
 
             if (initialize)

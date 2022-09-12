@@ -1,98 +1,56 @@
+using System;
 using UnityEngine;
-using UnityEngine.UI;
-using NaughtyAttributes;
-using TMPro;
 
 namespace LostThrone.Board
 {
+    [RequireComponent(typeof(CardView))]
     public abstract class Card : MonoBehaviour
     {
-        [SerializeField, Foldout("Main")] 
-        protected TMP_Text _titleText;
-        [SerializeField, Foldout("Main")] 
-        protected Image _iconImage;
-        [SerializeField, Foldout("Main")]
-        protected Canvas _canvas;
+        public event Action<Card> OnCardDestroyed;
 
-        [SerializeField, Foldout("Values")] 
-        protected TMP_Text _damageText;
-        [SerializeField, Foldout("Values")] 
-        protected TMP_Text _armorText;
-        [SerializeField, Foldout("Values")] 
-        protected TMP_Text _healthText;
+        [SerializeField] private Canvas _canvas;
+        [SerializeField] protected CardView CardView;
 
-        [SerializeField, Foldout("Modificators")] 
-        protected Transform _modificatorsParent;
-        [SerializeField, Foldout("Modificators")] 
-        protected GameObject _modificatorPrefab;
-
-        [SerializeField, Foldout("Additionals")] 
-        protected TMP_Text _levelText;
-        [SerializeField, Foldout("Additionals")] 
-        protected TMP_Text _rarityText;
-
-        [SerializeField, Foldout("Info Panel")] 
-        protected GameObject _infoObject;
-
-        protected BoardPlayer _player;
-        protected Unit _unit;
-
-        public BoardPlayer Player => _player;
-        public Unit Unit => _unit;
+        protected BoardPlayer Player;
+        protected Unit Unit;
 
         public abstract CardType Type { get; }
 
-        public void OpenInfoPanel() => _infoObject.SetActive(true);
+        public BoardPlayer GetPlayer() => Player;
 
-        public void CloseInfoPanel() => _infoObject.SetActive(false);
+        public Unit GetUnit() => Unit;
+
+        public CardView GetCardView() => CardView;
 
         protected void InitializeUnit(BoardPlayer player, Unit unit)
         {
-            _player = player;
-            _unit = unit;
+            _canvas.worldCamera = Camera.current;
 
-            _unit.GetStatistics(StatisticsType.Damage).OnValueChanged += RefreshStatistics;
-            _unit.GetStatistics(StatisticsType.Armor).OnValueChanged += RefreshStatistics;
-            _unit.GetStatistics(StatisticsType.Health).OnValueChanged += RefreshStatistics;
+            Player = player;
+            Unit = unit;
 
-            RefreshUI();
+            CardView.InitializeUnit(unit);
+
+            Unit.GetStatistics(StatisticsType.Damage).OnValueChanged += CardView.RefreshStatistics;
+            Unit.GetStatistics(StatisticsType.Armor).OnValueChanged += CardView.RefreshStatistics;
+            Unit.GetStatistics(StatisticsType.Health).OnValueChanged += CardView.RefreshStatistics;
+
+            CardView.RefreshUI();
         }
 
         private void OnDestroy()
         {
-            _unit.GetStatistics(StatisticsType.Damage).OnValueChanged -= RefreshStatistics;
-            _unit.GetStatistics(StatisticsType.Armor).OnValueChanged -= RefreshStatistics;
-            _unit.GetStatistics(StatisticsType.Health).OnValueChanged -= RefreshStatistics;
-        }
-
-        protected virtual void RefreshUI()
-        {
-            _titleText.text = _unit.Name;
-            _iconImage.sprite = _unit.CardIcon;
-            _levelText.text = _unit.Level.ToString();
-            _rarityText.text = _unit.CardRarity.ToString();
-
-            RefreshStatistics();
-        }
-
-        protected virtual void RefreshStatistics()
-        {
-            _damageText.text = _unit.GetStatistics(StatisticsType.Damage).Value.ToString("N0");
-            _armorText.text = _unit.GetStatistics(StatisticsType.Armor).Value.ToString("N0");
-            _healthText.text = _unit.GetStatistics(StatisticsType.Health).Value.ToString("N0");
+            Unit.GetStatistics(StatisticsType.Damage).OnValueChanged -= CardView.RefreshStatistics;
+            Unit.GetStatistics(StatisticsType.Armor).OnValueChanged -= CardView.RefreshStatistics;
+            Unit.GetStatistics(StatisticsType.Health).OnValueChanged -= CardView.RefreshStatistics;
         }
 
         public abstract void GetDamage(float value);
 
-        /// <summary>
-        /// Need to use BoardBase to destroy the card!
-        /// </summary>
-        public abstract void DestroyCard();
-    }
-
-    public enum CardType
-    {
-        Unit,
-        Tower
+        public virtual void DestroyCard()
+        {
+            Unit.GetStatistics(StatisticsType.Health).SetValue(0);
+            OnCardDestroyed?.Invoke(this);
+        }
     }
 }

@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
-using LostThrone.OpenWorld;
 using Cinemachine;
+using LostThrone.OpenWorld;
 using NaughtyAttributes;
+using UnityEngine;
 
 namespace LostThrone.Board
 {
@@ -17,36 +17,36 @@ namespace LostThrone.Board
         private BoardBase _base;
         public BoardBase Base => _base;
 
-        [SerializeField, Foldout("Grid")] 
+        [SerializeField, Foldout("Grid")]
         private Cell[] _cells;
-        [SerializeField, Foldout("Grid")] 
+        [SerializeField, Foldout("Grid")]
         private TowerCard[] _playerTowers;
-        [SerializeField, Foldout("Grid")] 
+        [SerializeField, Foldout("Grid")]
         private TowerCard[] _enemyTowers;
-        [SerializeField, Foldout("Grid")] 
+        [SerializeField, Foldout("Grid")]
         private CinemachineVirtualCamera _virtualCamera;
         private Cell[,] _grid;
 
         public Cell[] Cells => _cells;
-        public CinemachineVirtualCamera virtualCamera => _virtualCamera;
+        public CinemachineVirtualCamera VirtualCamera => _virtualCamera;
         public Cell[,] Grid => _grid;
 
-        [SerializeField, Foldout("Players")] 
+        [SerializeField, Foldout("Players")]
         private BoardPlayer _player;
-        [SerializeField, Foldout("Players")] 
+        [SerializeField, Foldout("Players")]
         private BoardPlayer _enemy;
-        [SerializeField, Foldout("Players")] 
+        [SerializeField, Foldout("Players")]
         private UnitCard _cardPrefab;
 
-        [SerializeField, Foldout("Parameters")] 
+        [SerializeField, Foldout("Parameters")]
         private int _turnPoints = 5;
-        [SerializeField, Foldout("Parameters")] 
+        [SerializeField, Foldout("Parameters")]
         private int _cardsLimitInLine = 3;
-        [SerializeField, Foldout("Parameters")] 
+        [SerializeField, Foldout("Parameters")]
         private int _requiredVerticalOffset = 1;
-        [SerializeField, Foldout("Parameters")] 
+        [SerializeField, Foldout("Parameters")]
         private int _maximumHorizontalOffset = 1;
-        [SerializeField, Foldout("Parameters")] 
+        [SerializeField, Foldout("Parameters")]
         private float _refreshLinesTime = 0.2f;
 
         public int TurnPoints => _turnPoints;
@@ -84,15 +84,42 @@ namespace LostThrone.Board
         private void Start()
         {
             _base = Services.GetService<BoardBase>();
+            _base.InitializeBoard(this);
         }
 
-        private void InititializePlayer(BoardPlayer player, BattleData battleData, TowerCard[] towersArray, int towerHorizontalPosition)
+        private void OnDestroy()
         {
-            List<TowerCard> towers = new List<TowerCard>(towersArray.Length);
+            UnSubscribeAll();
+        }
+
+        private void UnSubscribeAll()
+        {
+            UnSubscribeUnits(_player);
+            UnSubscribeUnits(_enemy);
+            UnSubscribeTowers(_player.Towers);
+            UnSubscribeTowers(_enemy.Towers);
+        }
+
+        private void UnSubscribeUnits(BoardPlayer player)
+        {
+            for (int i = 0; i < player.Cards.Count; i++)
+                player.Cards[i].OnCardDestroyed -= UnlistenCard;
+        }
+
+        private void UnSubscribeTowers(List<TowerCard> towers)
+        {
+            for (int i = 0; i < towers.Count; i++)
+                towers[i].OnCardDestroyed -= UnlistenCard;
+        }
+
+        private void InititializePlayer(BoardPlayer player, BattleData battleData, TowerCard[] towersArray)
+        {
+            List<TowerCard> towers = new(towersArray.Length);
 
             for (int i = 0; i < towersArray.Length; i++)
             {
-                towersArray[i].InitializeTower(this, _player, _grid[towerHorizontalPosition, i], battleData.Tower);
+                towersArray[i].InitializeTowerCard(_player, battleData.Tower);
+                towersArray[i].OnCardDestroyed += UnlistenCard;
                 towers.Add(towersArray[i]);
             }
 
@@ -102,7 +129,7 @@ namespace LostThrone.Board
 
         private List<UnitCard> InitializeUnits(List<Unit> units, BoardPlayer player)
         {
-            List<UnitCard> cards = new List<UnitCard>(units.Count);
+            List<UnitCard> cards = new(units.Count);
 
             for (int i = 0; i < units.Count; i++)
                 cards.Add(InitializeUnit(units[i], player));
@@ -113,7 +140,8 @@ namespace LostThrone.Board
         private UnitCard InitializeUnit(Unit unitData, BoardPlayer player)
         {
             UnitCard card = Instantiate(_cardPrefab, player.Hand.Parent);
-            card.InitializeCard(this, player, unitData);
+            card.InitializeUnitCard(this, player, unitData);
+            card.OnCardDestroyed += UnlistenCard;
             player.Hand.AddCard(card);
             return card;
         }
@@ -122,8 +150,8 @@ namespace LostThrone.Board
         {
             _base.SetCameraTarget(_virtualCamera, Grid[0, 1]);
 
-            InititializePlayer(_player, playerData, _playerTowers, PlayerLine);
-            InititializePlayer(_enemy, enemyData, _enemyTowers, EnemyLine);
+            InititializePlayer(_player, playerData, _playerTowers);
+            InititializePlayer(_enemy, enemyData, _enemyTowers);
 
             SetBattleState(BoardState.InProcess);
             SetTurnPosition(playerIsFirst ? PlayerPositionType : EnemyPositionType);
@@ -133,9 +161,15 @@ namespace LostThrone.Board
 
         #region Ending
 
-        public void EndBattle()
+        public void UnlistenCard(Card card)
         {
-            if (!_base.PlayerLost(this, _player) && !_base.PlayerLost(this, _enemy))
+            card.OnCardDestroyed -= UnlistenCard;
+            TryEndBattle();
+        }
+
+        public void TryEndBattle()
+        {
+            if (!_base.PlayerLost(_player) && !_base.PlayerLost(_enemy))
                 return;
 
             EndPlayer(_player);
@@ -144,6 +178,7 @@ namespace LostThrone.Board
             SetNothingTurn();
             RefreshPlayerStates(PlayerState.Win, PlayerState.Lose);
             SetBattleState(BoardState.Not);
+            UnSubscribeAll();
         }
 
         private void EndPlayer(BoardPlayer player)
@@ -216,45 +251,4 @@ namespace LostThrone.Board
 
         #endregion
     }
-
-    #region Enums
-
-    public enum BoardState
-    {
-        InProcess,
-        InVictory,
-        Not
-    }
-
-    public enum PlayerState
-    {
-        Attack,
-        Defend,
-        Win,
-        Lose
-    }
-
-    public enum PositionType
-    {
-        Top,
-        Bottom,
-        Nothing
-    }
-
-    public enum Direction
-    {
-        Top,
-        Right,
-        Bottom,
-        Left
-    }
-
-    public enum CardRarity
-    {
-        Common,
-        Rare,
-        Legendary
-    }
-
-    #endregion
 }

@@ -4,32 +4,22 @@ namespace LostThrone.Board
 {
     public abstract class Command
     {
-        protected Action _onCommandExecuted;
+        protected readonly Action OnCommandExecuted;
 
-        protected bool _executed;
+        protected readonly Board Board;
+        protected readonly BoardPlayer Player;
 
-        protected Board _board;
-        protected BoardPlayer _player;
+        protected bool Executed;
 
-        public bool Executed => _executed;
+        public bool IsExecuted() => Executed;
 
         public Command(Board board, BoardPlayer player, Action onCommandEnded)
         {
-            _board = board;
-            _player = player;
-            _onCommandExecuted = onCommandEnded;
+            Board = board;
+            Player = player;
+            OnCommandExecuted = onCommandEnded;
         }
 
         public abstract void Execute();
-    }
-
-    public abstract class CardCommand : Command
-    {
-        protected Card _card;
-
-        public CardCommand(Board board, BoardPlayer player, Card card, Action onCommandEnded) : base(board, player, onCommandEnded)
-        {
-            _card = card;
-        }
     }
 }

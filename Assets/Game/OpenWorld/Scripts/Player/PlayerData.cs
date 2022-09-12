@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -33,12 +34,14 @@ namespace LostThrone.OpenWorld
 
         public void Initialize(Unit player)
         {
-            _units = new List<Unit>(5);
-            _units.Add(player);
+            _units = new List<Unit>(5)
+            {
+                player
+            };
         }
     }
 
-    [System.Serializable]
+    [Serializable]
     public struct BattleData
     {
         public bool HaveMainUnit => MainUnit != null;

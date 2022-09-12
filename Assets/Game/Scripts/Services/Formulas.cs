@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace LostThrone
 {
-    public class Formulas : Service
+    public class Formulas : IService
     {
         private float _levelImportance = 0.4f;
         private float _damageImportance = 1;

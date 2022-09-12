@@ -1,6 +1,6 @@
 using System;
-using UnityEngine;
 using DG.Tweening;
+using UnityEngine;
 
 namespace LostThrone.Board
 {
@@ -10,14 +10,14 @@ namespace LostThrone.Board
 
         public override void Execute()
         {
-            _card.transform.position = new Vector3(_card.transform.position.x, _card.transform.position.y, 0);
+            Card.transform.position = new Vector3(Card.transform.position.x, Card.transform.position.y, 0);
 
-            _card.transform.DOScale(1.0f, 0.1f);
+            Card.transform.DOScale(1.0f, 0.1f);
             Sequence sequence = DOTween.Sequence();
-            sequence.Append(_card.transform.DOScale(1.0f, 0.1f));
-            sequence.AppendCallback(() => _onCommandExecuted?.Invoke());
+            sequence.Append(Card.transform.DOScale(1.0f, 0.1f));
+            sequence.AppendCallback(() => OnCommandExecuted?.Invoke());
 
-            _executed = true;
+            Executed = true;
         }
     }
 }

@@ -27,7 +27,18 @@ namespace LostThrone
         public Board.CardRarity CardRarity => _cardRarity;
         public Sprite CardIcon => _cardIcon;
 
-        public int Level { get { int level = 0; for (int i = 0; i < _attributes.Length; i++) level += (int)_attributes[i].value; return level; } }
+        public int Level 
+        { 
+            get
+            {
+                int level = 0;
+
+                for (int i = 0; i < _attributes.Length; i++)
+                    level += (int)_attributes[i].Value;
+
+                return level;
+            }
+        }
 
         public Unit(UnitData data)
         {
@@ -50,33 +61,39 @@ namespace LostThrone
 
         public Statistics GetStatistics(StatisticsType type) => _statistics.FirstOrDefault(s => s.Type == type);
 
-        public Attribute GetAttribute(AttributeType type) => _attributes.FirstOrDefault(a => a.type == type);
+        public Attribute GetAttribute(AttributeType type) => _attributes.FirstOrDefault(a => a.Type == type);
 
         public void SetAttributeValue(AttributeType type, float value)
         {
             for (int i = 0; i < _attributes.Length; i++)
-                if (_attributes[i].type == type)
-                    _attributes[i].value = value;
+            {
+                if (_attributes[i].Type == type)
+                    _attributes[i].Value = value;
+            }
         }
 
         public void IncreaseAttributeValue(AttributeType type, float value)
         {
             for (int i = 0; i < _attributes.Length; i++)
-                if (_attributes[i].type == type)
-                    _attributes[i].value += value;
+            {
+                if (_attributes[i].Type == type)
+                    _attributes[i].Value += value;
+            }
         }
 
         public void DecreaseAttributeValue(AttributeType type, float value)
         {
             for (int i = 0; i < _attributes.Length; i++)
-                if (_attributes[i].type == type)
-                    _attributes[i].value -= value;
+            {
+                if (_attributes[i].Type == type)
+                    _attributes[i].Value -= value;
+            }
         }
 
         public void AddLevel()
         {
             GetStatistics(StatisticsType.Experience).SetValue(0);
-            _attributes[UnityEngine.Random.Range(0, _attributes.Length)].value += 1;
+            _attributes[UnityEngine.Random.Range(0, _attributes.Length)].Value += 1;
             RefreshStatistics();
         }
 
@@ -91,22 +108,25 @@ namespace LostThrone
     }
 }
 
-[System.Serializable]
+[Serializable]
 public class Attribute
 {
-    public AttributeType type;
-    public float value;
+    private AttributeType _type;
+    public AttributeType Type { get => _type; set => _type = value; }
+
+    private float _value;
+    public float Value { get => _value; set => _value = value; }
 
     public Attribute(AttributeType type, float value)
     {
-        this.type = type;
-        this.value = value;
+        _type = type;
+        _value = value;
     }
 
-    public Attribute GetCopy() => new (type, value);
+    public Attribute GetCopy() => new(Type, Value);
 }
 
-[System.Serializable]
+[Serializable]
 public class Statistics
 {
     public event Action OnBelowTheLimit;
@@ -143,7 +163,7 @@ public class Statistics
         _value = value;
     }
 
-    public Statistics GetCopy() => new (_type, _valueEqualsMaxValue, _basicMaxValue, _maxValuePerAttributes, _increaseMultiply, _decreaseMultiply, _maxValue, _value);
+    public Statistics GetCopy() => new(_type, _valueEqualsMaxValue, _basicMaxValue, _maxValuePerAttributes, _increaseMultiply, _decreaseMultiply, _maxValue, _value);
 
     public void RefreshStatistics(Attribute[] attributes)
     {
@@ -152,9 +172,9 @@ public class Statistics
         {
             for (int y = 0; y < _maxValuePerAttributes.Length; y++)
             {
-                if (attributes[x].type == _maxValuePerAttributes[y].type)
+                if (attributes[x].Type == _maxValuePerAttributes[y].Type)
                 {
-                    additionByAttributes += attributes[x].value * _maxValuePerAttributes[y].value;
+                    additionByAttributes += attributes[x].Value * _maxValuePerAttributes[y].Value;
                     break;
                 }
             }

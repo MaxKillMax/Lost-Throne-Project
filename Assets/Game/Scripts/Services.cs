@@ -1,26 +1,26 @@
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace LostThrone
 {
     public static class Services
     {
-        private static HashSet<Service> services = new HashSet<Service>(5);
+        private static HashSet<IService> ServicesHashSet = new(5);
 
-        public static void RegisterService<T>(T service) where T : Service
+        public static void RegisterService<T>(T service) where T : IService
         {
-            if (!services.Any(s => s.GetType() == typeof(T)))
-                services.Add(service);
+            if (!ServicesHashSet.Any(s => s.GetType() == typeof(T)))
+                ServicesHashSet.Add(service);
         }
 
-        public static void UnregisterService<T>(T service) where T : Service
+        public static void UnregisterService<T>(T service) where T : IService
         {
-            if (services.Contains(service))
-                services.Remove(service);
+            if (ServicesHashSet.Contains(service))
+                ServicesHashSet.Remove(service);
         }
 
-        public static T GetService<T>() where T : Service => services.FirstOrDefault(s => s.GetType() == typeof(T)) as T;
+        public static T GetService<T>() where T : IService => ServicesHashSet.OfType<T>().FirstOrDefault();
 
-        public static bool HaveService<T>() where T : Service => GetService<T>() != default;
+        public static bool HaveService<T>() where T : IService => GetService<T>() != null;
     }
 }

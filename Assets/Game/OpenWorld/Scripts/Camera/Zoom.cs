@@ -1,13 +1,13 @@
 using System.Collections;
-using UnityEngine;
 using Cinemachine;
+using UnityEngine;
 
 public class Zoom : MonoBehaviour
 {
-    [SerializeField] private CinemachineVirtualCamera virtualCamera;
+    [SerializeField] private CinemachineVirtualCamera _virtualCamera;
 
-    [SerializeField] private float[] zoomValues;
-    [SerializeField] private float[] zoomTimes;
+    [SerializeField] private float[] _zoomValues;
+    [SerializeField] private float[] _zoomTimes;
 
     private ZoomType _currentZoom = ZoomType.Standard;
 
@@ -18,7 +18,7 @@ public class Zoom : MonoBehaviour
         _currentZoom = type;
 
         StopAllCoroutines();
-        StartCoroutine(WaitForZoom(virtualCamera.m_Lens.OrthographicSize, zoomValues[(int)type], zoomTimes[(int)type]));
+        StartCoroutine(WaitForZoom(_virtualCamera.m_Lens.OrthographicSize, _zoomValues[(int)type], _zoomTimes[(int)type]));
     }
 
     private IEnumerator WaitForZoom(float startZoom, float zoomValue, float time)
@@ -28,7 +28,7 @@ public class Zoom : MonoBehaviour
         while (tick < maxTick)
         {
             tick++;
-            virtualCamera.m_Lens.OrthographicSize = startZoom + ((zoomValue - startZoom) * ((float)tick / (float)maxTick));
+            _virtualCamera.m_Lens.OrthographicSize = startZoom + ((zoomValue - startZoom) * (tick / (float)maxTick));
             yield return new WaitForSeconds(time / maxTick);
         }
     }

@@ -1,13 +1,13 @@
 using System;
 using System.Linq;
-using UnityEngine;
 using DG.Tweening;
+using UnityEngine;
 
 namespace LostThrone.Board
 {
     public class AttackUnitCommand : CardCommand
     {
-        protected UnitCard _enemy;
+        private readonly UnitCard _enemy;
 
         public AttackUnitCommand(Board board, BoardPlayer player, Card card, UnitCard enemy, Action onCommandEnded = null) : base(board, player, card, onCommandEnded)
         {
@@ -17,25 +17,25 @@ namespace LostThrone.Board
         public override void Execute()
         {
             bool result = true;
-            UnitCard unitCard = _card as UnitCard;
+            UnitCard unitCard = Card as UnitCard;
 
-            if (unitCard.TurnCost > _card.Player.TurnPoints || _player.State != PlayerState.Attack || _player.TurnPoints <= 0)
+            if (unitCard.TurnCost > Card.GetPlayer().TurnPoints || Player.State != PlayerState.Attack || Player.TurnPoints <= 0)
                 result = false;
 
-            if (_board.Base.CardTypesEquals(unitCard, _enemy))
+            if (Board.Base.CardTypesEquals(unitCard, _enemy))
                 result = false;
 
-            Cell cardCell = _board.Base.GetUnitCell(_board, unitCard);
-            Cell enemyCell = _board.Base.GetUnitCell(_board, _enemy);
+            Cell cardCell = Board.Base.GetUnitCell(unitCard);
+            Cell enemyCell = Board.Base.GetUnitCell(_enemy);
 
             if (cardCell != enemyCell)
                 result = false;
 
             if (result)
             {
-                _enemy.GetDamage(unitCard.Unit.GetStatistics(StatisticsType.Damage).Value);
+                _enemy.GetDamage(unitCard.GetUnit().GetStatistics(StatisticsType.Damage).Value);
 
-                _player.RemoveTurnPoints(unitCard.TurnCost);
+                Player.RemoveTurnPoints(unitCard.TurnCost);
                 unitCard.DoubleCost();
 
                 Sequence sequence = DOTween.Sequence();
@@ -45,16 +45,16 @@ namespace LostThrone.Board
             }
             else
             {
-                _board.Base.RefreshLinePositions(cardCell.GetLine(_player.Type));
+                Board.Base.RefreshLinePositions(cardCell.GetLine(Player.Type));
             }
 
-            _executed = result;
+            Executed = result;
         }
 
         private void EndExecute(Cell cardCell)
         {
-            _board.Base.RefreshLinePositions(cardCell.GetLine(_player.Type));
-            _onCommandExecuted?.Invoke();
+            Board.Base.RefreshLinePositions(cardCell.GetLine(Player.Type));
+            OnCommandExecuted?.Invoke();
         }
     }
 }

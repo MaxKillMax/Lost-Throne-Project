@@ -1,7 +1,7 @@
 
 namespace LostThrone
 {
-    public abstract class Service
+    public interface IService
     {
 
     }

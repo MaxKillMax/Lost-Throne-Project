@@ -19,6 +19,7 @@ public class BuildingManager : MonoBehaviour
 
         int index = 0;
         float distance = float.MaxValue;
+
         for (int i = 0; i < _buildings.Count; i++)
         {
             float currentDistance = Vector3.Distance(position, _buildings[i].transform.position);

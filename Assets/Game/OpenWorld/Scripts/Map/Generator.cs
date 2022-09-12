@@ -1,46 +1,46 @@
 using System.Collections.Generic;
+using NaughtyAttributes;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Tilemaps;
-using TMPro;
-using NaughtyAttributes;
 
 [DisallowMultipleComponent]
 public class Generator : MonoBehaviour
 {
-    [SerializeField, Foldout("Components"), Required] 
+    [SerializeField, Foldout("Components"), Required]
     private BuildingManager _buildingManager;
-    [SerializeField, Foldout("Components"), Required] 
+    [SerializeField, Foldout("Components"), Required]
     private Map _map;
     [SerializeField, Foldout("Components"), Required]
     private Grid _grid;
     [SerializeField, Foldout("Components"), Required]
     private Tilemap _tilemap;
 
-    [SerializeField, Foldout("Debug Pathfinding")] 
+    [SerializeField, Foldout("Debug Pathfinding")]
     private TextMeshPro _debugText;
-    [SerializeField, Foldout("Debug Pathfinding")] 
+    [SerializeField, Foldout("Debug Pathfinding")]
     private bool _debugPathfinding;
 
-    [SerializeField, Foldout("Map generation")] 
+    [SerializeField, Foldout("Map generation")]
     private Tile[] _easyTiles;
-    [SerializeField, Foldout("Map generation")] 
+    [SerializeField, Foldout("Map generation")]
     private Tile[] _usuallyTiles;
-    [SerializeField, Foldout("Map generation")] 
+    [SerializeField, Foldout("Map generation")]
     private Tile[] _hardlyTiles;
-    [SerializeField, Foldout("Map generation")] 
+    [SerializeField, Foldout("Map generation")]
     private Tile[] _impassableTiles;
-    [SerializeField, Foldout("Map generation")] 
+    [SerializeField, Foldout("Map generation")]
     private float[] _tileMovementMultiplies;
-    [SerializeField, Foldout("Map generation")] 
+    [SerializeField, Foldout("Map generation")]
     private float[] _tileMovementCosts;
 
-    [SerializeField, Foldout("Building generation")] 
+    [SerializeField, Foldout("Building generation")]
     private Transform _parent;
-    [SerializeField, Foldout("Building generation")] 
+    [SerializeField, Foldout("Building generation")]
     private float _minDistanceBetweenBuildings = 2;
-    [SerializeField, Foldout("Building generation")] 
+    [SerializeField, Foldout("Building generation")]
     private Building[] _buildingPrefabs;
-    [SerializeField, Foldout("Building generation"), Range(0, 1)] 
+    [SerializeField, Foldout("Building generation"), Range(0, 1)]
     private float _additionalSpawnChance = 0.0f;
 
     private Tile[][] _tilesTypes;
@@ -60,7 +60,7 @@ public class Generator : MonoBehaviour
         _findedTiles = new List<TileData>(5000);
         _tilesTypes = new Tile[][] { _easyTiles, _usuallyTiles, _hardlyTiles, _impassableTiles };
 
-        Vector3Int position = new Vector3Int();
+        Vector3Int position = new();
         for (int x = -1000; x < 1000; x++)
         {
             for (int y = -1000; y < 1000; y++)
@@ -75,7 +75,7 @@ public class Generator : MonoBehaviour
             }
         }
 
-        Wave _pathfinding = new Wave();
+        Wave _pathfinding = new();
         _pathfinding.Initialize(_map, _tilemap, DebugCreateText, _debugPathfinding);
 
         _map.InitializeMap(_grid, _tilemap, _findedTiles, _pathfinding);
@@ -101,15 +101,14 @@ public class Generator : MonoBehaviour
             if (chance <= 1 - _buildingPrefabs[currentBuildingPrefab].SpawnChanceChange - _additionalSpawnChance)
                 continue;
 
-            if (!_buildingPrefabs[currentBuildingPrefab].GroundTypeEquals(tiles[i].type))
+            if (!_buildingPrefabs[currentBuildingPrefab].GroundTypeEquals(tiles[i].Type))
+                continue;
+            if (_buildingManager.GetNearestBuildingDistance(tiles[i].RealPosition, out _) <= _minDistanceBetweenBuildings)
                 continue;
 
-            if (_buildingManager.GetNearestBuildingDistance(tiles[i].realPosition, out Building nearestPoint) <= _minDistanceBetweenBuildings)
-                continue;
-
-            Vector3 position = tiles[i].realPosition;
+            Vector3 position = tiles[i].RealPosition;
             Building building = Instantiate(_buildingPrefabs[currentBuildingPrefab], position, Quaternion.identity, _parent);
-            building.Initialize(position, tiles[i].cellPosition);
+            building.Initialize(position, tiles[i].CellPosition);
             _createdBuildings.Add(building);
             _buildingManager.SetBuildingsList(_createdBuildings);
         }
@@ -131,7 +130,7 @@ public class Generator : MonoBehaviour
 
     public void DebugCreateText(Vector3 position, string cost)
     {
-        var t = Instantiate(_debugText, transform);
+        TextMeshPro t = Instantiate(_debugText, transform);
         t.transform.position = position;
         t.text = cost;
     }
@@ -147,21 +146,33 @@ public enum TileType
 
 public struct TileData
 {
-    public Tile tile;
-    public TileType type;
-    public Vector3Int cellPosition;
-    public Vector3 worldPosition;
-    public float movementMultiply;
-    public float movementCost;
-    public Vector3 realPosition => worldPosition + new Vector3(0, 0.3f, 0);
+    private Tile _tile;
+    public Tile Tile { get => _tile; set => _tile = value; }
+
+    private TileType _type;
+    public TileType Type { get => _type; set => _type = value; }
+
+    private Vector3Int _cellPosition;
+    public Vector3Int CellPosition { get => _cellPosition; set => _cellPosition = value; }
+
+    private Vector3 _worldPosition;
+    public Vector3 WorldPosition { get => _worldPosition; set => _worldPosition = value; }
+
+    private float _movementMultiply;
+    public float MovementMultiply { get => _movementMultiply; set => _movementMultiply = value; }
+
+    private float _movementCost;
+    public float MovementCost { get => _movementCost; set => _movementCost = value; }
+
+    public Vector3 RealPosition => WorldPosition + new Vector3(0, 0.3f, 0);
 
     public TileData(Tile tile, TileType type, Vector3Int cellPosition, Vector3 worldPosition, float movementMultiply, float movementCost)
     {
-        this.tile = tile;
-        this.type = type;
-        this.cellPosition = cellPosition;
-        this.worldPosition = worldPosition;
-        this.movementMultiply = movementMultiply;
-        this.movementCost = movementCost;
+        _tile = tile;
+        _type = type;
+        _cellPosition = cellPosition;
+        _worldPosition = worldPosition;
+        _movementMultiply = movementMultiply;
+        _movementCost = movementCost;
     }
 }

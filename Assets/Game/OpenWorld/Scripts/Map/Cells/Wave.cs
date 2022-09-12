@@ -7,16 +7,16 @@ public class Wave : Pathfinding
     private List<Vector3Int> _checkedTiles;
     private List<Vector3Int> _allTiles;
 
-    private Vector3Int start;
-    private Vector3Int end;
+    private Vector3Int _start;
+    private Vector3Int _end;
 
     public override TileData[] CreatePath(Vector3 startPosition, Vector3 endPosition)
     {
-        if (_tilemap.WorldToCell(startPosition) == _tilemap.WorldToCell(endPosition))
-            return new TileData[] { _map.GetTileData(startPosition) };
+        if (Tilemap.WorldToCell(startPosition) == Tilemap.WorldToCell(endPosition))
+            return new TileData[] { Map.GetTileData(startPosition) };
 
         InitializeAlgorythm(startPosition, endPosition);
-        CheckTile(start);
+        CheckTile(_start);
 
         if (_allTiles.Count == _checkedTiles.Count)
             return default;
@@ -24,7 +24,7 @@ public class Wave : Pathfinding
         if (!FindEndTile())
             return default;
 
-        if (_debug)
+        if (Debug)
             CreateMoneyTexts();
 
         return GetCompletedPath();
@@ -35,21 +35,21 @@ public class Wave : Pathfinding
         for (int i = 0; i < _allTiles.Count; i++)
         {
             string cost = _tileCosts[GetPositionIndex(_allTiles[i])].ToString();
-            onTextRequired?.Invoke(_map.GetTileData(_allTiles[i]).realPosition, cost);
+            OnTextRequired?.Invoke(Map.GetTileData(_allTiles[i]).RealPosition, cost);
         }
     }
 
     private void InitializeAlgorythm(Vector3 startPosition, Vector3 endPosition)
     {
-        start = _tilemap.WorldToCell(startPosition);
-        end = _tilemap.WorldToCell(endPosition);
+        _start = Tilemap.WorldToCell(startPosition);
+        _end = Tilemap.WorldToCell(endPosition);
 
         _tileCosts = new List<float>(200);
         _checkedTiles = new List<Vector3Int>(200);
         _allTiles = new List<Vector3Int>(300);
 
         _tileCosts.Add(0);
-        _allTiles.Add(start);
+        _allTiles.Add(_start);
     }
 
     private bool FindEndTile()
@@ -64,25 +64,26 @@ public class Wave : Pathfinding
 
             if (attempt > maxAttempt)
             {
-                if (_debug)
-                    Debug.LogWarning("attempt limit exceeded");
+                if (Debug)
+                    UnityEngine.Debug.LogWarning("attempt limit exceeded");
                 break;
             }
 
             if (_allTiles.Count == _checkedTiles.Count)
             {
-                if (_debug)
-                    Debug.LogWarning("all tiles equals checked tiles");
+                if (Debug)
+                    UnityEngine.Debug.LogWarning("all tiles equals checked tiles");
                 break;
             }
 
             if (HaveEndTile())
             {
-                if (_debug)
+                if (Debug)
                 {
-                    Debug.LogWarning("end finded");
-                    Debug.LogWarning("cost: " + _tileCosts[GetPositionIndex(end)]);
+                    UnityEngine.Debug.LogWarning("end finded");
+                    UnityEngine.Debug.LogWarning("cost: " + _tileCosts[GetPositionIndex(_end)]);
                 }
+
                 return true;
             }
         }
@@ -101,7 +102,7 @@ public class Wave : Pathfinding
 
     private List<Vector3Int> FindNewNeighbors(Vector3Int position)
     {
-        List<Vector3Int> neighbors = new List<Vector3Int>()
+        List<Vector3Int> neighbors = new()
         {
             new Vector3Int(position.x + 1, position.y, 0),
             new Vector3Int(position.x, position.y + 1, 0),
@@ -110,8 +111,10 @@ public class Wave : Pathfinding
         };
 
         for (int i = neighbors.Count - 1; i >= 0; i--)
-            if (_allTiles.Contains(neighbors[i]) || !_map.TryGetTileData(neighbors[i], out TileData data) || data.type == TileType.Impassable)
+        {
+            if (_allTiles.Contains(neighbors[i]) || !Map.TryGetTileData(neighbors[i], out TileData data) || data.Type == TileType.Impassable)
                 neighbors.RemoveAt(i);
+        }
 
         return neighbors;
     }
@@ -121,11 +124,13 @@ public class Wave : Pathfinding
         float parentCost = 0;
 
         for (int i = 0; i < _allTiles.Count; i++)
+        {
             if (_allTiles[i] == parent)
                 parentCost = _tileCosts[i];
+        }
 
         for (int i = 0; i < tiles.Count; i++)
-            _tileCosts.Add(parentCost + _map.GetTileData(tiles[i]).movementCost);
+            _tileCosts.Add(parentCost + Map.GetTileData(tiles[i]).MovementCost);
     }
 
     private void SetTilesAsNew(List<Vector3Int> tiles)
@@ -155,7 +160,7 @@ public class Wave : Pathfinding
         return _allTiles[index];
     }
 
-    private bool HaveEndTile() => _allTiles.Contains(end);
+    private bool HaveEndTile() => _allTiles.Contains(_end);
 
     private int GetPositionIndex(Vector3Int position)
     {
@@ -170,39 +175,41 @@ public class Wave : Pathfinding
 
     private TileData[] GetCompletedPath()
     {
-        List<Vector3Int> path = new List<Vector3Int>(15);
-        path.Add(end);
+        List<Vector3Int> path = new(15)
+        {
+            _end
+        };
 
         int attempt = 0;
         int maxAttempt = 25;
 
-        while (path[path.Count - 1] != start)
+        while (path[^1] != _start)
         {
-            path.Add(FindEasiestNeighbor(path[path.Count - 1]));
+            path.Add(FindEasiestNeighbor(path[^1]));
             attempt++;
 
             if (attempt > maxAttempt)
             {
-                if (_debug)
-                    Debug.LogError("path not completed");
-                path.Add(start);
+                if (Debug)
+                    UnityEngine.Debug.LogError("path not completed");
+                path.Add(_start);
                 break;
             }
         }
 
-        path.Remove(start);
+        path.Remove(_start);
         path.Reverse();
 
         TileData[] datas = new TileData[path.Count];
         for (int i = 0; i < path.Count; i++)
-            datas[i] = _map.GetTileData(path[i]);
+            datas[i] = Map.GetTileData(path[i]);
 
         return datas;
     }
 
     private Vector3Int FindEasiestNeighbor(Vector3Int position)
     {
-        List<Vector3Int> neighbors = new List<Vector3Int>()
+        List<Vector3Int> neighbors = new()
         {
             new Vector3Int(position.x + 1, position.y, 0),
             new Vector3Int(position.x, position.y + 1, 0),
@@ -211,8 +218,10 @@ public class Wave : Pathfinding
         };
 
         for (int i = neighbors.Count - 1; i >= 0; i--)
+        {
             if (!_allTiles.Contains(neighbors[i]))
                 neighbors.RemoveAt(i);
+        }
 
         int index = 0;
         float value = float.MaxValue;

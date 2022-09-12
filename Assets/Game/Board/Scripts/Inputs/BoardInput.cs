@@ -4,17 +4,19 @@ namespace LostThrone.Board
 {
     public class BoardInput : MonoBehaviour
     {
-        [SerializeField] protected BoardPlayer _player;
-        [SerializeField] protected BoardPlayer _enemy;
-        [SerializeField] protected Board _board;
+        [SerializeField] protected BoardPlayer Player;
+        [SerializeField] protected BoardPlayer Enemy;
+        [SerializeField] protected Board Board;
 
-        protected UnitCard _selectedCard;
+        protected UnitCard SelectedCard;
 
-        protected Formulas _formulas;
+        protected BoardBase Base;
+        protected Formulas Formulas;
 
         private void Start()
         {
-            _formulas = Services.GetService<Formulas>();
+            Base = Services.GetService<BoardBase>();
+            Formulas = Services.GetService<Formulas>();
         }
     }
 }

@@ -5,7 +5,7 @@ namespace LostThrone.OpenWorld
     {
         public Tower(UnitData data) : base(data)
         {
-            
+
         }
     }
 }

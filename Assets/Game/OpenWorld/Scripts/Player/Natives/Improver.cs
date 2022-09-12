@@ -1,20 +1,18 @@
-using UnityEngine;
-
 namespace LostThrone.OpenWorld
 {
     public class Improver : NativeComponent
     {
         public void ImproveAttribute(AttributeType type, float value)
         {
-            _data.Unit.SetAttributeValue(type, _data.Unit.GetAttribute(type).value + value);
+            Data.Unit.SetAttributeValue(type, Data.Unit.GetAttribute(type).Value + value);
         }
 
         public void DowngradeAttribute(AttributeType type, float value)
         {
-            if (_data.Unit.GetAttribute(type).value - value < 0)
+            if (Data.Unit.GetAttribute(type).Value - value < 0)
                 return;
 
-            _data.Unit.SetAttributeValue(type, _data.Unit.GetAttribute(type).value - value);
+            Data.Unit.SetAttributeValue(type, Data.Unit.GetAttribute(type).Value - value);
         }
     }
 }

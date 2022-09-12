@@ -6,7 +6,7 @@ namespace LostThrone.Board
     {
         public void TryAttack(Board board, BoardPlayer player, TowerCard towerCard)
         {
-            
+
         }
     }
 }

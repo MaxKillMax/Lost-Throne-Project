@@ -8,14 +8,14 @@ namespace LostThrone.OpenWorld
         {
             base.Initialize(player, data);
 
-            UnitData unitData = _data.PlayerUnitData;
+            UnitData unitData = Data.PlayerUnitData;
             Attribute[] attributes = unitData.Attributes;
 
             int points = 0;
             for (int i = 0; i < attributes.Length; i++)
             {
-                points += (int)attributes[i].value;
-                attributes[i].value = 0;
+                points += (int)attributes[i].Value;
+                attributes[i].Value = 0;
             }
 
             int random;
@@ -23,12 +23,12 @@ namespace LostThrone.OpenWorld
             {
                 random = Random.Range(0, attributes.Length);
 
-                attributes[random].value++;
+                attributes[random].Value++;
                 points--;
             }
 
-            Unit playerUnit = new Unit(unitData);
-            _data.Initialize(playerUnit);
+            Unit playerUnit = new(unitData);
+            Data.Initialize(playerUnit);
         }
     }
 }

@@ -1,34 +1,29 @@
-using UnityEngine;
 
 namespace LostThrone.Board
 {
     public class TowerCard : Card
     {
-        private Board _board;
-        private Cell _cell;
-
         public override CardType Type => CardType.Tower;
 
-        public void InitializeTower(Board board, BoardPlayer player, Cell cell, Unit unit)
+        public void InitializeTowerCard(BoardPlayer player, Unit unit)
         {
-            _canvas.worldCamera = Camera.current;
             gameObject.SetActive(true);
-
-            _board = board;
-            _cell = cell;
-
             InitializeUnit(player, unit);
         }
 
         public override void GetDamage(float value)
         {
-            float health = _unit.GetStatistics(StatisticsType.Health).Value - Services.GetService<Formulas>().DamageReducedByArmor(value, _unit.GetStatistics(StatisticsType.Armor).Value);
-            _unit.GetStatistics(StatisticsType.Health).SetValue(health);
+            float health = Unit.GetStatistics(StatisticsType.Health).Value - Services.GetService<Formulas>().DamageReducedByArmor(value, Unit.GetStatistics(StatisticsType.Armor).Value);
+            Unit.GetStatistics(StatisticsType.Health).SetValue(health);
 
             if (health <= 0)
-                Services.GetService<BoardBase>().DestroyTowerCard(_board, this);
+                DestroyCard();
         }
 
-        public override void DestroyCard() => gameObject.SetActive(false);
+        public override void DestroyCard()
+        {
+            base.DestroyCard();
+            gameObject.SetActive(false);
+        }
     }
 }

@@ -34,7 +34,7 @@ public class Map : MonoBehaviour
     {
         for (int i = 0; i < _tiles.Count; i++)
         {
-            if (_tiles[i].cellPosition == position)
+            if (_tiles[i].CellPosition == position)
             {
                 data = _tiles[i];
                 return true;

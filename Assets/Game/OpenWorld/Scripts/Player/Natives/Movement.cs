@@ -18,15 +18,15 @@ namespace LostThrone.OpenWorld
             Vector3 mousePosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             mousePosition.z = 0;
 
-            _path = _data.Map.GetTileDatasOfPath(_player.transform.position, mousePosition);
+            _path = Data.Map.GetTileDatasOfPath(Player.transform.position, mousePosition);
             _currentPath = 0;
 
             if (_path != null && _path.Length > 0)
             {
                 CanUpdate = true;
                 _slowestUnitSpeed = GetMinUnitSpeed();
-                if (_data.Zoom.GetZoomState() != ZoomType.Standard)
-                    _data.Zoom.SetZoom(ZoomType.Standard);
+                if (Data.Zoom.GetZoomState() != ZoomType.Standard)
+                    Data.Zoom.SetZoom(ZoomType.Standard);
             }
             else
             {
@@ -47,7 +47,7 @@ namespace LostThrone.OpenWorld
 
         private float GetMinUnitSpeed()
         {
-            List<Unit> units = _data.Units;
+            List<Unit> units = Data.Units;
 
             float minSpeed = float.MaxValue;
             float currentSpeed = 0;
@@ -64,9 +64,9 @@ namespace LostThrone.OpenWorld
 
         public override void Update()
         {
-            _data.Transform.position = Vector3.MoveTowards(_data.Transform.position, _path[_currentPath].realPosition, _speed * _slowestUnitSpeed * _path[_currentPath].movementMultiply * 0.00001f);
+            Data.Transform.position = Vector3.MoveTowards(Data.Transform.position, _path[_currentPath].RealPosition, _speed * _slowestUnitSpeed * _path[_currentPath].MovementMultiply * 0.00001f);
 
-            if (Vector2.Distance(_data.Transform.position, _path[_currentPath].realPosition) < _minDistance)
+            if (Vector2.Distance(Data.Transform.position, _path[_currentPath].RealPosition) < _minDistance)
                 SetNextPath();
         }
 
@@ -75,7 +75,7 @@ namespace LostThrone.OpenWorld
             _currentPath++;
             if (_currentPath >= _path.Length)
             {
-                if (_data.BuildingManager.GetNearestBuildingDistance(_path[_path.Length - 1].realPosition, out Building building) < _buildingDistance)
+                if (Data.BuildingManager.GetNearestBuildingDistance(_path[^1].RealPosition, out _) < _buildingDistance)
                     OpenBuilding();
                 CanUpdate = false;
             }
@@ -83,7 +83,7 @@ namespace LostThrone.OpenWorld
 
         public void OpenBuilding()
         {
-            _data.Zoom.SetZoom(ZoomType.InBuilding);
+            Data.Zoom.SetZoom(ZoomType.InBuilding);
         }
     }
 }

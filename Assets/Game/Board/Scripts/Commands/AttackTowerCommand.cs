@@ -1,14 +1,14 @@
 using System;
 using System.Linq;
-using UnityEngine;
 using DG.Tweening;
+using UnityEngine;
 
 namespace LostThrone.Board
 {
     public class AttackTowerCommand : CardCommand
     {
-        protected BoardPlayer _enemy;
-        protected TowerCard _enemyCard;
+        private readonly BoardPlayer _enemy;
+        private readonly TowerCard _enemyCard;
 
         public AttackTowerCommand(Board board, BoardPlayer player, Card card, BoardPlayer enemy, TowerCard enemyCard, Action onCommandEnded = null) : base(board, player, card, onCommandEnded)
         {
@@ -19,25 +19,25 @@ namespace LostThrone.Board
         public override void Execute()
         {
             bool result = true;
-            UnitCard unitCard = _card as UnitCard;
+            UnitCard unitCard = Card as UnitCard;
 
-            if (unitCard.TurnCost > _card.Player.TurnPoints || _player.State != PlayerState.Attack || _player.TurnPoints <= 0)
+            if (unitCard.TurnCost > Card.GetPlayer().TurnPoints || Player.State != PlayerState.Attack || Player.TurnPoints <= 0)
                 result = false;
 
-            if (_board.Base.CardTypesEquals(unitCard, _enemyCard))
+            if (Board.Base.CardTypesEquals(unitCard, _enemyCard))
                 result = false;
 
-            Cell cardCell = _board.Base.GetUnitCell(_board, unitCard);
-            Cell enemyCell = _board.Base.GetTowerCell(_board, _enemy, _enemyCard);
+            Cell cardCell = Board.Base.GetUnitCell(unitCard);
+            Cell enemyCell = Board.Base.GetTowerCell(_enemy, _enemyCard);
 
             if (cardCell != enemyCell)
                 result = false;
 
             if (result)
             {
-                _enemyCard.GetDamage(unitCard.Unit.GetStatistics(StatisticsType.Damage).Value);
+                _enemyCard.GetDamage(unitCard.GetUnit().GetStatistics(StatisticsType.Damage).Value);
 
-                _player.RemoveTurnPoints(unitCard.TurnCost);
+                Player.RemoveTurnPoints(unitCard.TurnCost);
                 unitCard.DoubleCost();
 
                 Sequence sequence = DOTween.Sequence();
@@ -47,16 +47,16 @@ namespace LostThrone.Board
             }
             else
             {
-                _board.Base.RefreshLinePositions(cardCell.GetLine(_player.Type));
+                Board.Base.RefreshLinePositions(cardCell.GetLine(Player.Type));
             }
 
-            _executed = result;
+            Executed = result;
         }
 
         private void EndExecute(Cell cardCell)
         {
-            _board.Base.RefreshLinePositions(cardCell.GetLine(_player.Type)); 
-            _onCommandExecuted?.Invoke();
+            Board.Base.RefreshLinePositions(cardCell.GetLine(Player.Type));
+            OnCommandExecuted?.Invoke();
         }
     }
 }
