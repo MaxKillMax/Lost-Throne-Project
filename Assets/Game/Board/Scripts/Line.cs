@@ -9,7 +9,7 @@ namespace LostThrone.Board
     {
         [SerializeField] private PositionType _type;
         [SerializeField] private Transform _parent;
-        [SerializeField] private Cell _cell;
+        private Cell _cell;
 
         private readonly List<UnitCard> _cards = new(2);
 

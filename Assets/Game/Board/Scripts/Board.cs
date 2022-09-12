@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Cinemachine;
+using DG.Tweening;
 using LostThrone.OpenWorld;
 using NaughtyAttributes;
 using UnityEngine;
@@ -125,6 +126,8 @@ namespace LostThrone.Board
 
             List<UnitCard> playerCards = InitializeUnits(battleData.Units, player);
             player.StartBattle(battleData, playerCards, towers);
+
+            RefreshLinePositions(player.Hand);
         }
 
         private List<UnitCard> InitializeUnits(List<Unit> units, BoardPlayer player)
@@ -250,5 +253,13 @@ namespace LostThrone.Board
         }
 
         #endregion
+
+        public void RefreshLinePositions(Line line)
+        {
+            Debug.Log("Refresh line of cell:" + line.Cell.transform.name);
+            float middle = (line.Cards.Count - 1f) / 2;
+            for (int i = 0; i < line.Cards.Count; i++)
+                line.Cards[i].transform.DOLocalMove(new Vector3(i - middle, 0, 0), 0.2f);
+        }
     }
 }

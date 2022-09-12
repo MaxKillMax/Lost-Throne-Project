@@ -13,7 +13,7 @@ namespace LostThrone.Board
         protected BoardBase Base;
         protected Formulas Formulas;
 
-        private void Start()
+        protected virtual void Start()
         {
             Base = Services.GetService<BoardBase>();
             Formulas = Services.GetService<Formulas>();

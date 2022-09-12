@@ -47,7 +47,7 @@ namespace LostThrone.Board
             }
             else
             {
-                Board.Base.RefreshLinePositions(cardCell.GetLine(Player.Type));
+                Board.RefreshLinePositions(cardCell.GetLine(Player.Type));
             }
 
             Executed = result;
@@ -55,7 +55,7 @@ namespace LostThrone.Board
 
         private void EndExecute(Cell cardCell)
         {
-            Board.Base.RefreshLinePositions(cardCell.GetLine(Player.Type));
+            Board.RefreshLinePositions(cardCell.GetLine(Player.Type));
             OnCommandExecuted?.Invoke();
         }
     }

@@ -28,13 +28,6 @@ namespace LostThrone
 
         #region Do something
 
-        public void RefreshLinePositions(Line line)
-        {
-            float middle = (line.Cards.Count - 1f) / 2;
-            for (int i = 0; i < line.Cards.Count; i++)
-                line.Cards[i].transform.DOLocalMove(new Vector3(i - middle, 0, 0), 0.2f);
-        }
-
         public void MoveCamera(Direction direction)
         {
             for (int x = 0; x < _grid.GetLength(0); x++)
@@ -117,6 +110,12 @@ namespace LostThrone
         {
             PositionType type = card.GetPlayer().Type;
             Cell cell = GetCellWithCondition(out horizontal, out vertical, (findedCell, h, v) => findedCell.GetLine(type).Cards.Contains(card));
+
+            if (horizontal == -1 && vertical == -1)
+            {
+                horizontal = 1;
+                vertical = card.GetPlayer().Type == PositionType.Bottom ? -1 : _grid.GetLength(0);
+            }    
 
             return card.GetPlayer().Hand.Cards.Contains(card) ? card.GetPlayer().Hand.Cell : cell;
         }

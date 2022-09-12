@@ -20,19 +20,7 @@ MonoBehaviour:
   - _type: 0
     _valueEqualsMaxValue: 0
     _basicMaxValue: 100
-    _maxValuePerAttributes:
-    - type: 0
-      value: 5
-    - type: 1
-      value: 5
-    - type: 2
-      value: 5
-    - type: 3
-      value: 5
-    - type: 4
-      value: 5
-    - type: 5
-      value: 5
+    _maxValuePerAttributes: []
     _increaseMultiply: 1
     _decreaseMultiply: 1
     _maxValue: 0
@@ -40,39 +28,15 @@ MonoBehaviour:
   - _type: 1
     _valueEqualsMaxValue: 0
     _basicMaxValue: 40
-    _maxValuePerAttributes:
-    - type: 0
-      value: 0
-    - type: 1
-      value: 4
-    - type: 2
-      value: 0
-    - type: 3
-      value: 1
-    - type: 4
-      value: 0
-    - type: 5
-      value: 1
+    _maxValuePerAttributes: []
     _increaseMultiply: 1
     _decreaseMultiply: 1
-    _maxValue: 100
-    _value: 100
+    _maxValue: 150
+    _value: 150
   - _type: 2
     _valueEqualsMaxValue: 0
     _basicMaxValue: 100
-    _maxValuePerAttributes:
-    - type: 0
-      value: 0
-    - type: 1
-      value: 1
-    - type: 2
-      value: 0
-    - type: 3
-      value: 2
-    - type: 4
-      value: 3
-    - type: 5
-      value: 0
+    _maxValuePerAttributes: []
     _increaseMultiply: 1
     _decreaseMultiply: 1
     _maxValue: 0
@@ -80,19 +44,7 @@ MonoBehaviour:
   - _type: 3
     _valueEqualsMaxValue: 0
     _basicMaxValue: 100
-    _maxValuePerAttributes:
-    - type: 0
-      value: 0
-    - type: 1
-      value: 1
-    - type: 2
-      value: 1
-    - type: 3
-      value: 1
-    - type: 4
-      value: 3
-    - type: 5
-      value: 0
+    _maxValuePerAttributes: []
     _increaseMultiply: 1
     _decreaseMultiply: 1
     _maxValue: 0
@@ -100,19 +52,7 @@ MonoBehaviour:
   - _type: 4
     _valueEqualsMaxValue: 0
     _basicMaxValue: 100
-    _maxValuePerAttributes:
-    - type: 0
-      value: 0
-    - type: 1
-      value: 1
-    - type: 2
-      value: 0
-    - type: 3
-      value: 1
-    - type: 4
-      value: 3
-    - type: 5
-      value: 1
+    _maxValuePerAttributes: []
     _increaseMultiply: 1
     _decreaseMultiply: 1
     _maxValue: 0
@@ -120,19 +60,7 @@ MonoBehaviour:
   - _type: 5
     _valueEqualsMaxValue: 0
     _basicMaxValue: 100
-    _maxValuePerAttributes:
-    - type: 0
-      value: 1
-    - type: 1
-      value: 1
-    - type: 2
-      value: 4
-    - type: 3
-      value: 0
-    - type: 4
-      value: 0
-    - type: 5
-      value: 0
+    _maxValuePerAttributes: []
     _increaseMultiply: 1
     _decreaseMultiply: 1
     _maxValue: 0
@@ -140,19 +68,7 @@ MonoBehaviour:
   - _type: 6
     _valueEqualsMaxValue: 0
     _basicMaxValue: 100
-    _maxValuePerAttributes:
-    - type: 0
-      value: 4
-    - type: 1
-      value: 0
-    - type: 2
-      value: 1
-    - type: 3
-      value: 1
-    - type: 4
-      value: 0
-    - type: 5
-      value: 0
+    _maxValuePerAttributes: []
     _increaseMultiply: 1
     _decreaseMultiply: 1
     _maxValue: 0
@@ -160,19 +76,7 @@ MonoBehaviour:
   - _type: 7
     _valueEqualsMaxValue: 1
     _basicMaxValue: 10
-    _maxValuePerAttributes:
-    - type: 0
-      value: 6
-    - type: 1
-      value: 0
-    - type: 2
-      value: 0
-    - type: 3
-      value: 0
-    - type: 4
-      value: 0
-    - type: 5
-      value: 0
+    _maxValuePerAttributes: []
     _increaseMultiply: 1
     _decreaseMultiply: 1
     _maxValue: 15
@@ -180,19 +84,7 @@ MonoBehaviour:
   - _type: 8
     _valueEqualsMaxValue: 1
     _basicMaxValue: 2
-    _maxValuePerAttributes:
-    - type: 0
-      value: 0
-    - type: 1
-      value: 3
-    - type: 2
-      value: 1
-    - type: 3
-      value: 0
-    - type: 4
-      value: 1
-    - type: 5
-      value: 1
+    _maxValuePerAttributes: []
     _increaseMultiply: 1
     _decreaseMultiply: 1
     _maxValue: 0
@@ -200,19 +92,7 @@ MonoBehaviour:
   - _type: 9
     _valueEqualsMaxValue: 1
     _basicMaxValue: 40
-    _maxValuePerAttributes:
-    - type: 0
-      value: 0
-    - type: 1
-      value: 0
-    - type: 2
-      value: 0
-    - type: 3
-      value: 5
-    - type: 4
-      value: 0
-    - type: 5
-      value: 1
+    _maxValuePerAttributes: []
     _increaseMultiply: 1
     _decreaseMultiply: 1
     _maxValue: 0
@@ -220,19 +100,7 @@ MonoBehaviour:
   - _type: 10
     _valueEqualsMaxValue: 1
     _basicMaxValue: 0
-    _maxValuePerAttributes:
-    - type: 0
-      value: 0
-    - type: 1
-      value: 0
-    - type: 2
-      value: 4
-    - type: 3
-      value: 0
-    - type: 4
-      value: 1
-    - type: 5
-      value: 1
+    _maxValuePerAttributes: []
     _increaseMultiply: 1
     _decreaseMultiply: 1
     _maxValue: 0
@@ -240,19 +108,7 @@ MonoBehaviour:
   - _type: 11
     _valueEqualsMaxValue: 1
     _basicMaxValue: 2
-    _maxValuePerAttributes:
-    - type: 0
-      value: 0
-    - type: 1
-      value: 0
-    - type: 2
-      value: 0
-    - type: 3
-      value: 0
-    - type: 4
-      value: 0
-    - type: 5
-      value: 6
+    _maxValuePerAttributes: []
     _increaseMultiply: 1
     _decreaseMultiply: 1
     _maxValue: 0
@@ -260,34 +116,10 @@ MonoBehaviour:
   - _type: 12
     _valueEqualsMaxValue: 1
     _basicMaxValue: 0
-    _maxValuePerAttributes:
-    - type: 0
-      value: 1
-    - type: 1
-      value: 3
-    - type: 2
-      value: 0
-    - type: 3
-      value: 0
-    - type: 4
-      value: 1
-    - type: 5
-      value: 1
+    _maxValuePerAttributes: []
     _increaseMultiply: 1
     _decreaseMultiply: 1
     _maxValue: 40
     _value: 40
   _attributesAreNotNeeded: 1
-  _attributes:
-  - type: 0
-    value: 5
-  - type: 1
-    value: 5
-  - type: 2
-    value: 5
-  - type: 3
-    value: 5
-  - type: 4
-    value: 5
-  - type: 5
-    value: 5
+  _attributes: []

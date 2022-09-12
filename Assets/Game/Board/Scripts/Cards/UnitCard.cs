@@ -48,7 +48,7 @@ namespace LostThrone.Board
         {
             Cell cell = _board.Base.GetUnitCell(this);
             cell.GetLine(GetPlayer().Type).RemoveCard(this);
-            _board.Base.RefreshLinePositions(cell.GetLine(GetPlayer().Type));
+            _board.RefreshLinePositions(cell.GetLine(GetPlayer().Type));
 
             base.DestroyCard();
             Destroy(gameObject);

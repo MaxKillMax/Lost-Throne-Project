@@ -2629,6 +2629,7 @@ GameObject:
   - component: {fileID: 6419792595624114178}
   - component: {fileID: 6419792595624114188}
   - component: {fileID: 2691842639084953306}
+  - component: {fileID: 1525127896534836229}
   m_Layer: 0
   m_Name: Tower
   m_TagString: Untagged
@@ -2690,18 +2691,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d67114a7b7e83684e8716798b02d8117, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _damageText: {fileID: 3559469439243679942}
-  _armorText: {fileID: 6808009615100504069}
-  _healthText: {fileID: 2981661010759433942}
-  _titleText: {fileID: 5040967624403299625}
-  _iconImage: {fileID: 4538891368204790247}
-  _modificatorsParent: {fileID: 3255009131015953181}
-  _modificatorPrefab: {fileID: 0}
-  _turnCostText: {fileID: 4119548257264277649}
-  _levelText: {fileID: 433585932328401197}
-  _rarityText: {fileID: 5257062749562540449}
-  _infoObject: {fileID: 3528926871195498067}
   _canvas: {fileID: 7084960313906770724}
+  CardView: {fileID: 1525127896534836229}
+--- !u!114 &1525127896534836229
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6419792595624114177}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb1541bd643122044bfcd0050cf1cbb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  TitleText: {fileID: 5040967624403299625}
+  IconImage: {fileID: 4538891368204790247}
+  DamageText: {fileID: 3559469439243679942}
+  ArmorText: {fileID: 6808009615100504069}
+  HealthText: {fileID: 2981661010759433942}
+  ModificatorsParent: {fileID: 3255009131015953181}
+  ModificatorPrefab: {fileID: 0}
+  LevelText: {fileID: 433585932328401197}
+  RarityText: {fileID: 5257062749562540449}
+  InfoObject: {fileID: 3528926871195498067}
 --- !u!1 &6819558459206035301
 GameObject:
   m_ObjectHideFlags: 0

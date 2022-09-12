@@ -1,5 +1,6 @@
 using System;
 using DG.Tweening;
+using UnityEngine;
 
 namespace LostThrone.Board
 {
@@ -42,15 +43,16 @@ namespace LostThrone.Board
                 if (!startCell)
                 {
                     Player.Hand.RemoveCard(unitCard);
+                    Board.RefreshLinePositions(Player.Hand);
                 }
                 else
                 {
                     startCell.GetLine(Player.Type).RemoveCard(unitCard);
-                    Board.Base.RefreshLinePositions(startCell.GetLine(Player.Type));
+                    Board.RefreshLinePositions(startCell.GetLine(Player.Type));
                 }
 
                 _endCell.GetLine(Player.Type).AddCard(unitCard);
-                Board.Base.RefreshLinePositions(_endCell.GetLine(Player.Type));
+                Board.RefreshLinePositions(_endCell.GetLine(Player.Type));
 
                 unitCard.transform.SetParent(endLine.Parent);
 
@@ -61,23 +63,18 @@ namespace LostThrone.Board
             else
             {
                 if (startCell)
-                    Board.Base.RefreshLinePositions(startCell.GetLine(Player.Type));
+                    Board.RefreshLinePositions(startCell.GetLine(Player.Type));
+                else
+                    Board.RefreshLinePositions(Player.Hand);
             }
-
-            if (startCell)
-                Board.Base.RefreshLinePositions(startCell.GetLine(Player.Type));
-            else
-                Board.Base.RefreshLinePositions(Player.Hand);
-
-            Board.Base.RefreshLinePositions(_endCell.GetLine(Player.Type));
 
             Executed = result;
         }
 
         private void EndExecute(Cell startCell)
         {
-            Board.Base.RefreshLinePositions(startCell.GetLine(Player.Type));
-            Board.Base.RefreshLinePositions(_endCell.GetLine(Player.Type));
+            Board.RefreshLinePositions(startCell.GetLine(Player.Type));
+            Board.RefreshLinePositions(_endCell.GetLine(Player.Type));
             OnCommandExecuted?.Invoke();
         }
     }

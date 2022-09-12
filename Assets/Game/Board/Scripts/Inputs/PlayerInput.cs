@@ -22,6 +22,13 @@ namespace LostThrone.Board
             Board.OnPlayerTurnChanged -= CheckState;
         }
 
+        protected override void Start()
+        {
+            base.Start();
+            // UNDONE: Camera initialized in the wrong place
+            Formulas.InitializeCamera(_camera);
+        }
+        
         private void CheckState(PositionType type)
         {
             _playerTurnUI.SetActive(type == Player.Type);
@@ -59,13 +66,16 @@ namespace LostThrone.Board
                 SelectedCard.GetCardView().CloseInfoPanel();
 
             _selectionState = CardSelectionState.Nothing;
-            SelectedCard = null;
 
-            if (Formulas.TryGetObjectInMousePosition(out UnitCard unitCard, (unitCard) => unitCard.GetPlayer() == Player))
+            if (Formulas.TryGetObjectInMousePosition(out UnitCard unitCard, (unitCard) => unitCard.GetPlayer() == Player) && SelectedCard != unitCard)
             {
                 _selectionState = CardSelectionState.Selected;
                 SelectedCard = unitCard;
                 _currentTime = _minDragTime;
+            }
+            else
+            {
+                SelectedCard = null;
             }
         }
 
@@ -115,12 +125,23 @@ namespace LostThrone.Board
         {
             UnitCard cachedCard = SelectedCard;
 
+            Debug.Log("Use card");
+
             if (Formulas.TryGetObjectInMousePosition(out UnitCard unitCard, (unitCard) => unitCard.GetPlayer().Type == Board.EnemyPositionType))
+            {
                 new AttackUnitCommand(Board, Player, SelectedCard, unitCard, () => { new DropCommand(Board, Player, cachedCard).Execute(); }).Execute();
+                Debug.Log("Unit");
+            }
             else if (Formulas.TryGetObjectInMousePosition(out TowerCard towerCard, (towerCard) => towerCard.GetPlayer().Type == Board.EnemyPositionType))
+            {
                 new AttackTowerCommand(Board, Player, SelectedCard, Enemy, towerCard, () => { new DropCommand(Board, Player, cachedCard).Execute(); }).Execute();
+                Debug.Log("Tower");
+            }
             else if (Formulas.TryGetObjectInMousePosition(out Cell cell))
+            {
                 new MovementCommand(Board, Player, SelectedCard, cell, () => { new DropCommand(Board, Player, cachedCard).Execute(); }).Execute();
+                Debug.Log("Cell");
+            }
         }
 
         private Vector3 GetMouseWorldPosition() => _camera.ScreenToWorldPoint(Input.mousePosition);
