@@ -8,15 +8,13 @@ namespace LostThrone.Board
     {
         public PickupCommand(Board board, BoardPlayer player, UnitCard unitCard, Action onCommandEnded = null) : base(board, player, unitCard, onCommandEnded) { }
 
-        public override void Execute()
+        protected override void StartCommand()
         {
             Card.transform.position = new Vector3(Card.transform.position.x, Card.transform.position.y, -1);
 
             Sequence sequence = DOTween.Sequence();
             sequence.Append(Card.transform.DOScale(1.5f, 0.2f));
-            sequence.AppendCallback(() => OnCommandExecuted?.Invoke());
-
-            Executed = true;
+            sequence.AppendCallback(() => EndCommand());
         }
     }
 }

@@ -9,54 +9,49 @@ namespace LostThrone.Board
     {
         private readonly BoardPlayer _enemy;
         private readonly TowerCard _enemyCard;
+        private UnitCard _unitCard;
+        private Cell _cardCell;
 
         public AttackTowerCommand(Board board, BoardPlayer player, Card card, BoardPlayer enemy, TowerCard enemyCard, Action onCommandEnded = null) : base(board, player, card, onCommandEnded)
         {
             _enemy = enemy;
             _enemyCard = enemyCard;
+            _unitCard = Card as UnitCard;
         }
 
-        public override void Execute()
+        protected override bool CanExecute()
         {
             bool result = true;
-            UnitCard unitCard = Card as UnitCard;
 
-            if (unitCard.TurnCost > Card.GetPlayer().TurnPoints || Player.State != PlayerState.Attack || Player.TurnPoints <= 0)
+            if (!base.CanExecute())
                 result = false;
 
-            if (Board.Base.CardTypesEquals(unitCard, _enemyCard))
+            if (!Board.Base.UnitCanAttackTower(_unitCard, Player))
                 result = false;
 
-            Cell cardCell = Board.Base.GetUnitCell(unitCard);
+            if (Board.Base.CardTypesEquals(_unitCard, _enemyCard))
+                result = false;
+
+            _cardCell = Board.Base.GetUnitCell(_unitCard);
             Cell enemyCell = Board.Base.GetTowerCell(_enemy, _enemyCard);
 
-            if (cardCell != enemyCell)
+            if (_cardCell != enemyCell)
                 result = false;
 
-            if (result)
-            {
-                _enemyCard.GetDamage(unitCard.GetUnit().GetStatistics(StatisticsType.Damage).Value);
-
-                Player.RemoveTurnPoints(unitCard.TurnCost);
-                unitCard.DoubleCost();
-
-                Sequence sequence = DOTween.Sequence();
-                sequence.Append(unitCard.transform.DOMove(new Vector3(_enemyCard.transform.position.x, _enemyCard.transform.position.y, unitCard.transform.position.z), 0.2f));
-                sequence.AppendCallback(() => EndExecute(cardCell));
-                sequence.Play();
-            }
-            else
-            {
-                Board.RefreshLinePositions(cardCell.GetLine(Player.Type));
-            }
-
-            Executed = result;
+            return result;
         }
 
-        private void EndExecute(Cell cardCell)
+        protected override void StartCommand()
         {
-            Board.RefreshLinePositions(cardCell.GetLine(Player.Type));
-            OnCommandExecuted?.Invoke();
+            _enemyCard.GetDamage(_unitCard.GetUnit().GetStatistics(StatisticsType.Damage).Value);
+
+            Player.RemoveTurnPoints(_unitCard.TurnCost);
+            _unitCard.DoubleCost();
+
+            Sequence sequence = DOTween.Sequence();
+            sequence.Append(_unitCard.transform.DOMove(new Vector3(_enemyCard.transform.position.x, _enemyCard.transform.position.y, _unitCard.transform.position.z), 0.2f));
+            sequence.AppendCallback(() => EndCommand());
+            sequence.Play();
         }
     }
 }

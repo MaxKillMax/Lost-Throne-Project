@@ -4,22 +4,45 @@ namespace LostThrone.Board
 {
     public abstract class Command
     {
-        protected readonly Action OnCommandExecuted;
+        protected readonly Action OnCommandEnded;
 
         protected readonly Board Board;
         protected readonly BoardPlayer Player;
 
-        protected bool Executed;
-
-        public bool IsExecuted() => Executed;
+        private bool _result;
+        public bool Result => _result;
 
         public Command(Board board, BoardPlayer player, Action onCommandEnded)
         {
             Board = board;
             Player = player;
-            OnCommandExecuted = onCommandEnded;
+            OnCommandEnded = onCommandEnded;
         }
 
-        public abstract void Execute();
+        public void Execute()
+        {
+            _result = CanExecute();
+
+            if (_result)
+                StartCommand();
+            else
+                EndCommand();
+        }
+
+        protected virtual bool CanExecute()
+        {
+            return Board.Base.PlayerCanMove(Player);
+        }
+
+        protected virtual void StartCommand()
+        {
+            UnityEngine.Debug.Log("Command not overrided");
+            EndCommand();
+        }
+
+        protected virtual void EndCommand()
+        {
+            OnCommandEnded?.Invoke();
+        }
     }
 }

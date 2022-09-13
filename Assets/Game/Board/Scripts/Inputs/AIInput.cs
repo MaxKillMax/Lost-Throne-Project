@@ -6,8 +6,14 @@ namespace LostThrone.Board
 {
     public class AIInput : BoardInput
     {
+        public Action<AIState> OnStateChanged;
+
         private readonly float _delayBeforeAction = 1;
         private float _time = 1;
+
+        private AIState _state = AIState.Nothing;
+
+        public AIState State => _state;
 
         private void Update()
         {
@@ -21,14 +27,38 @@ namespace LostThrone.Board
 
             _time = _delayBeforeAction;
 
+            // TODO: AIInput contains debug code. Remove it
             if (TryGetEnemyUnitCard(ref SelectedCard, out UnitCard enemyUnitCard))
+            {
+                //Debug.Log("Attack units: " + SelectedCard + " : " + enemyUnitCard);
+                SetAIState(AIState.Attacks);
                 AttackUnitCard(enemyUnitCard);
+                return;
+            }
             else if (TryGetEnemyTowerCard(ref SelectedCard, out TowerCard enemyTowerCard))
+            {
+                //Debug.Log("Attack towers: " + SelectedCard + " : " + enemyTowerCard);
+                SetAIState(AIState.AttackTower);
                 AttackTowerCard(enemyTowerCard);
+                return;
+            }
             else if (CanMove(ref SelectedCard, out Cell cell))
-                Move(cell);
+            {
+                //Debug.Log("Move units: " + SelectedCard + " : " + cell);
+                SetAIState(AIState.Moving);
+                MoveToCell(cell);
+                return;
+            }
+
+            SetAIState(AIState.Nothing);
 
             Board.SwitchTurn();
+        }
+
+        private void SetAIState(AIState state)
+        {
+            _state = state;
+            OnStateChanged?.Invoke(_state);
         }
 
         #region Checks
@@ -60,7 +90,7 @@ namespace LostThrone.Board
         {
             enemyTowerCard = default;
 
-            List<UnitCard> cards = GetCards((unitCard) => Board.Base.UnitCanAttack(unitCard, Player));
+            List<UnitCard> cards = GetCards((unitCard) => Board.Base.UnitCanAttackTower(unitCard, Player));
 
             if (cards.Count == 0)
                 return false;
@@ -109,8 +139,11 @@ namespace LostThrone.Board
             cell = default;
 
             List<UnitCard> cards = GetCards((unitCard) => Board.Base.UnitCanMove(unitCard, Player));
-
             cards = Board.Base.GetUnitsWithBestCondition(cards, false, (unitCard) => unitCard.TurnCost);
+
+            if (cards.Count == 0)
+                return false;
+
             UnitCard card = cards[UnityEngine.Random.Range(0, cards.Count)];
 
             List<Cell> cells = Board.Base.GetMovementCells(Player, card);
@@ -154,26 +187,29 @@ namespace LostThrone.Board
 
         private void AttackUnitCard(UnitCard enemyUnitCard)
         {
-            Debug.Log("Attack units: " + SelectedCard + " : " + enemyUnitCard);
-            new PickupCommand(Board, Player, SelectedCard, () =>
-            new AttackUnitCommand(Board, Player, SelectedCard, enemyUnitCard, () =>
-            new DropCommand(Board, Player, SelectedCard).Execute()).Execute()).Execute();
+            UnitCard cachedCard = SelectedCard;
+
+            new PickupCommand(Board, Player, cachedCard, () =>
+            new AttackUnitCommand(Board, Player, cachedCard, enemyUnitCard, () =>
+            new DropCommand(Board, Player, cachedCard).Execute()).Execute()).Execute();
         }
 
         private void AttackTowerCard(TowerCard enemyTowerCard)
         {
-            Debug.Log("Attack towers: " + SelectedCard + " : " + enemyTowerCard);
-            new PickupCommand(Board, Player, SelectedCard, () =>
-            new AttackTowerCommand(Board, Player, SelectedCard, Enemy, enemyTowerCard, () =>
-            new DropCommand(Board, Player, SelectedCard).Execute()).Execute()).Execute();
+            UnitCard cachedCard = SelectedCard;
+
+            new PickupCommand(Board, Player, cachedCard, () =>
+            new AttackTowerCommand(Board, Player, cachedCard, Enemy, enemyTowerCard, () =>
+            new DropCommand(Board, Player, cachedCard).Execute()).Execute()).Execute();
         }
 
-        private void Move(Cell cell)
+        private void MoveToCell(Cell cell)
         {
-            Debug.Log("Move units: " + SelectedCard + " : " + cell);
-            new PickupCommand(Board, Player, SelectedCard, () =>
-            new MovementCommand(Board, Player, SelectedCard, cell, () =>
-            new DropCommand(Board, Player, SelectedCard).Execute()).Execute()).Execute();
+            UnitCard cachedCard = SelectedCard;
+
+            new PickupCommand(Board, Player, cachedCard, () =>
+            new MovementCommand(Board, Player, cachedCard, cell, () =>
+            new DropCommand(Board, Player, cachedCard).Execute()).Execute()).Execute();
         }
 
         #endregion

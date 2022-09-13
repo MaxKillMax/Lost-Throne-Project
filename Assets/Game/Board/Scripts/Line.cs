@@ -25,7 +25,7 @@ namespace LostThrone.Board
 
         public void AddCard(UnitCard card)
         {
-            if (_cards.Contains(card))
+            if (!_cards.Contains(card))
                 _cards.Add(card);
         }
 

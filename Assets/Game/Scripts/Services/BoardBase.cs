@@ -28,6 +28,13 @@ namespace LostThrone
 
         #region Do something
 
+        public void RefreshLinePositions(Line line)
+        {
+            float middle = (line.Cards.Count - 1f) / 2;
+            for (int i = 0; i < line.Cards.Count; i++)
+                line.Cards[i].transform.DOLocalMove(new Vector3(i - middle, 0, 0), 0.2f);
+        }
+
         public void MoveCamera(Direction direction)
         {
             for (int x = 0; x < _grid.GetLength(0); x++)
@@ -115,7 +122,7 @@ namespace LostThrone
             {
                 horizontal = 1;
                 vertical = card.GetPlayer().Type == PositionType.Bottom ? -1 : _grid.GetLength(0);
-            }    
+            }
 
             return card.GetPlayer().Hand.Cards.Contains(card) ? card.GetPlayer().Hand.Cell : cell;
         }
@@ -312,9 +319,11 @@ namespace LostThrone
 
         public bool PlayerCanMove(BoardPlayer player) => player.Type == _board.TurnPosition && _board.GameState == BoardState.InProcess;
 
-        public bool UnitCanAttack(UnitCard unit, BoardPlayer player) => player.TurnPoints >= unit.TurnCost && GetUnitCell(unit).GetLine(player.Type == PositionType.Bottom ? PositionType.Top : PositionType.Bottom).Cards.Count > 0;
+        public bool UnitCanAttack(UnitCard unit, BoardPlayer player) => player.TurnPoints >= unit.TurnCost && !player.Hand.Cards.Contains(unit) && GetUnitCell(unit).GetLine(player.Type == PositionType.Bottom ? PositionType.Top : PositionType.Bottom).Cards.Count > 0;
 
-        public bool UnitCanMove(UnitCard unit, BoardPlayer player) => player.TurnPoints >= unit.TurnCost && GetUnitCell(unit).GetLine(player.Type == PositionType.Bottom ? PositionType.Top : PositionType.Bottom).Cards.Count == 0;
+        public bool UnitCanAttackTower(UnitCard unit, BoardPlayer player) => player.TurnPoints >= unit.TurnCost && GetUnitCell(unit, out int horizontal, out int vertical) && vertical == (player.Type == _board.PlayerPositionType ? _board.EnemyLine : _board.PlayerLine);
+
+        public bool UnitCanMove(UnitCard unit, BoardPlayer player) => player.TurnPoints >= unit.TurnCost && (GetUnitCell(unit).GetLine(player.Type == PositionType.Bottom ? PositionType.Top : PositionType.Bottom).Cards.Count == 0 || player.Hand.Cards.Contains(unit));
 
         public bool LineCanAcceptCard(Line line, UnitCard card)
             => !line.Cards.Contains(card) && line.Cards.Count < _board.CardsLimitInLine;

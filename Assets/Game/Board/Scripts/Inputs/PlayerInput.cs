@@ -7,9 +7,10 @@ namespace LostThrone.Board
         [SerializeField] private GameObject _playerTurnUI;
         [SerializeField] private Camera _camera;
 
-        private readonly float _minDragTime = 0.1f;
+        private readonly float _minDragTime = 0.13f;
         private float _currentTime = 0.1f;
 
+        private bool _canOpenCard = true;
         private CardSelectionState _selectionState = CardSelectionState.Nothing;
 
         private void Awake()
@@ -65,10 +66,9 @@ namespace LostThrone.Board
             if (_selectionState == CardSelectionState.Opened)
                 SelectedCard.GetCardView().CloseInfoPanel();
 
-            _selectionState = CardSelectionState.Nothing;
-
-            if (Formulas.TryGetObjectInMousePosition(out UnitCard unitCard, (unitCard) => unitCard.GetPlayer() == Player) && SelectedCard != unitCard)
+            if (Formulas.TryGetObjectInMousePosition(out UnitCard unitCard, (unitCard) => unitCard.GetPlayer() == Player))
             {
+                _canOpenCard = unitCard != SelectedCard || _selectionState != CardSelectionState.Opened;
                 _selectionState = CardSelectionState.Selected;
                 SelectedCard = unitCard;
                 _currentTime = _minDragTime;
@@ -76,12 +76,13 @@ namespace LostThrone.Board
             else
             {
                 SelectedCard = null;
+                _selectionState = CardSelectionState.Nothing;
             }
         }
 
         private void OnInputMouse()
         {
-            if (!CanHoldCard())
+            if (!(_selectionState is CardSelectionState.Selected or CardSelectionState.Moved))
                 return;
 
             _currentTime -= Time.deltaTime;
@@ -102,10 +103,9 @@ namespace LostThrone.Board
                     return;
                 }
             }
-
-            if (_selectionState == CardSelectionState.Moved)
+            else if (_selectionState == CardSelectionState.Moved)
             {
-                Vector3 mousePosition = GetMouseWorldPosition();
+                Vector3 mousePosition = _camera.ScreenToWorldPoint(Input.mousePosition);
                 mousePosition.z = SelectedCard.transform.position.z;
                 SelectedCard.transform.position = mousePosition;
             }
@@ -113,10 +113,15 @@ namespace LostThrone.Board
 
         private void OnInputMouseUp()
         {
-            if (_selectionState == CardSelectionState.Selected)
+            if (_selectionState == CardSelectionState.Selected && _canOpenCard)
+            {
                 SelectedCard.GetCardView().OpenInfoPanel();
+                _selectionState = CardSelectionState.Opened;
+            }
             else if (_selectionState == CardSelectionState.Moved)
+            {
                 UseSelectedCard();
+            }
         }
 
         #endregion
@@ -125,27 +130,14 @@ namespace LostThrone.Board
         {
             UnitCard cachedCard = SelectedCard;
 
-            Debug.Log("Use card");
-
-            if (Formulas.TryGetObjectInMousePosition(out UnitCard unitCard, (unitCard) => unitCard.GetPlayer().Type == Board.EnemyPositionType))
-            {
+            if (Base.UnitCanAttack(cachedCard, Player) && Formulas.TryGetObjectInMousePosition(out UnitCard unitCard, (unitCard) => unitCard.GetPlayer().Type == Board.EnemyPositionType))
                 new AttackUnitCommand(Board, Player, SelectedCard, unitCard, () => { new DropCommand(Board, Player, cachedCard).Execute(); }).Execute();
-                Debug.Log("Unit");
-            }
-            else if (Formulas.TryGetObjectInMousePosition(out TowerCard towerCard, (towerCard) => towerCard.GetPlayer().Type == Board.EnemyPositionType))
-            {
+            else if (Base.UnitCanAttackTower(cachedCard, Player) && Formulas.TryGetObjectInMousePosition(out TowerCard towerCard, (towerCard) => towerCard.GetPlayer().Type == Board.EnemyPositionType))
                 new AttackTowerCommand(Board, Player, SelectedCard, Enemy, towerCard, () => { new DropCommand(Board, Player, cachedCard).Execute(); }).Execute();
-                Debug.Log("Tower");
-            }
-            else if (Formulas.TryGetObjectInMousePosition(out Cell cell))
-            {
+            else if (Base.UnitCanMove(cachedCard, Player) && Formulas.TryGetObjectInMousePosition(out Cell cell))
                 new MovementCommand(Board, Player, SelectedCard, cell, () => { new DropCommand(Board, Player, cachedCard).Execute(); }).Execute();
-                Debug.Log("Cell");
-            }
+            else
+                new DropCommand(Board, Player, cachedCard).Execute();
         }
-
-        private Vector3 GetMouseWorldPosition() => _camera.ScreenToWorldPoint(Input.mousePosition);
-
-        private bool CanHoldCard() => _selectionState is CardSelectionState.Selected or CardSelectionState.Moved;
     }
 }

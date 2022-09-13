@@ -23,7 +23,7 @@ namespace LostThrone.Board
 
         IEnumerator Start()
         {
-            yield return new WaitForSeconds(3);
+            yield return new WaitForSeconds(1);
 
             List<Unit> enemyUnits = CreateUnits(_enemies);
             Tower enemyTower = CreateTower(_tower);

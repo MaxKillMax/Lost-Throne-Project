@@ -51,4 +51,12 @@ namespace LostThrone.Board
         Unit,
         Tower
     }
+
+    public enum AIState
+    {
+        Moving,
+        Attacks,
+        AttackTower,
+        Nothing
+    }
 }

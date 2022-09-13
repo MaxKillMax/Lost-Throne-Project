@@ -1,81 +1,67 @@
 using System;
-using DG.Tweening;
-using UnityEngine;
 
 namespace LostThrone.Board
 {
     public class MovementCommand : CardCommand
     {
-        private readonly Cell _endCell;
+        private Cell _endCell;
+        private UnitCard _unitCard;
+        private Cell _startCell;
+        private Line _endLine;
 
         public MovementCommand(Board board, BoardPlayer player, Card card, Cell endCell, Action onCommandEnded = null) : base(board, player, card, onCommandEnded)
         {
             _endCell = endCell;
+            _unitCard = Card as UnitCard;
         }
 
-        public override void Execute()
+        protected override bool CanExecute()
         {
             bool result = true;
-            UnitCard unitCard = Card as UnitCard;
 
-            if (unitCard.TurnCost > Card.GetPlayer().TurnPoints || Player.State != PlayerState.Attack || Player.TurnPoints <= 0)
+            if (!base.CanExecute())
                 result = false;
 
-            Line endLine = _endCell.GetLine(Player.Type);
-
-            if (!Board.Base.LineCanAcceptCard(endLine, unitCard))
+            if (!Board.Base.UnitCanMove(_unitCard, Player))
                 result = false;
 
-            Cell startCell = Board.Base.GetUnitCell(unitCard, out int startHorizontal, out int startVertical);
+            _endLine = _endCell.GetLine(Player.Type);
+
+            if (!Board.Base.LineCanAcceptCard(_endLine, _unitCard))
+                result = false;
+
+            _startCell = Board.Base.GetUnitCell(_unitCard, out int startHorizontal, out int startVertical);
             Board.Base.GetCellCoordinates(_endCell, out int endHorizontal, out int endVertical);
 
-            if (startCell && Board.Base.CellHaveEnemies(Player, startCell))
+            if (_startCell != Player.Hand.Cell && Board.Base.CellHaveEnemies(Player, _startCell))
                 result = false;
 
             if (Board.Base.HasWrongPosition(Player, startHorizontal, startVertical, endHorizontal, endVertical))
                 result = false;
 
-            if (result)
-            {
-                Player.RemoveTurnPoints(unitCard.TurnCost);
-                unitCard.DoubleCost();
-
-                if (!startCell)
-                {
-                    Player.Hand.RemoveCard(unitCard);
-                    Board.RefreshLinePositions(Player.Hand);
-                }
-                else
-                {
-                    startCell.GetLine(Player.Type).RemoveCard(unitCard);
-                    Board.RefreshLinePositions(startCell.GetLine(Player.Type));
-                }
-
-                _endCell.GetLine(Player.Type).AddCard(unitCard);
-                Board.RefreshLinePositions(_endCell.GetLine(Player.Type));
-
-                unitCard.transform.SetParent(endLine.Parent);
-
-                Sequence sequence = DOTween.Sequence();
-                sequence.AppendInterval(Board.RefreshLinesTime);
-                sequence.AppendCallback(() => EndExecute(startCell));
-            }
-            else
-            {
-                if (startCell)
-                    Board.RefreshLinePositions(startCell.GetLine(Player.Type));
-                else
-                    Board.RefreshLinePositions(Player.Hand);
-            }
-
-            Executed = result;
+            return result;
         }
 
-        private void EndExecute(Cell startCell)
+        protected override void StartCommand()
         {
-            Board.RefreshLinePositions(startCell.GetLine(Player.Type));
-            Board.RefreshLinePositions(_endCell.GetLine(Player.Type));
-            OnCommandExecuted?.Invoke();
+            Player.RemoveTurnPoints(_unitCard.TurnCost);
+            _unitCard.DoubleCost();
+
+            _startCell.GetLine(Player.Type).RemoveCard(_unitCard);
+            Board.Base.RefreshLinePositions(_startCell.GetLine(Player.Type));
+
+            _endCell.GetLine(Player.Type).AddCard(_unitCard);
+            Board.Base.RefreshLinePositions(_endCell.GetLine(Player.Type));
+
+            _unitCard.transform.SetParent(_endLine.Parent);
+
+            EndCommand();
+        }
+
+        protected override void EndCommand()
+        {
+            Board.Base.RefreshLinePositions(_startCell.GetLine(Player.Type));
+            base.EndCommand();
         }
     }
 }
