@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Cinemachine;
-using DG.Tweening;
 using LostThrone.OpenWorld;
 using NaughtyAttributes;
 using UnityEngine;
@@ -18,18 +17,11 @@ namespace LostThrone.Board
         private BoardBase _base;
         public BoardBase Base => _base;
 
-        [SerializeField, Foldout("Grid")]
+        [SerializeField]
         private Cell[] _cells;
-        [SerializeField, Foldout("Grid")]
-        private TowerCard[] _playerTowers;
-        [SerializeField, Foldout("Grid")]
-        private TowerCard[] _enemyTowers;
-        [SerializeField, Foldout("Grid")]
-        private CinemachineVirtualCamera _virtualCamera;
         private Cell[,] _grid;
 
         public Cell[] Cells => _cells;
-        public CinemachineVirtualCamera VirtualCamera => _virtualCamera;
         public Cell[,] Grid => _grid;
 
         [SerializeField, Foldout("Players")]
@@ -50,6 +42,16 @@ namespace LostThrone.Board
         [SerializeField, Foldout("Parameters")]
         private float _refreshLinesTime = 0.2f;
 
+        [SerializeField, Foldout("Towers")]
+        private TowerInput _towerInput;
+        [SerializeField, Foldout("Towers")]
+        private TowerCard[] _playerTowers;
+        [SerializeField, Foldout("Towers")]
+        private TowerCard[] _enemyTowers;
+
+        [SerializeField, Foldout("Components")]
+        private BoardCamera _boardCamera;
+
         public int TurnPoints => _turnPoints;
         public int CardsLimitInLine => _cardsLimitInLine;
         public int RequiredVerticalOffset => _requiredVerticalOffset;
@@ -58,6 +60,8 @@ namespace LostThrone.Board
 
         private BoardState _gameState = BoardState.Not;
         public BoardState GameState => _gameState;
+
+        private PositionType _nextTurn = PositionType.Nothing;
 
         private PositionType _turnPosition = PositionType.Nothing;
         public PositionType TurnPosition => _turnPosition;
@@ -80,17 +84,21 @@ namespace LostThrone.Board
                 { _cells[3], _cells[4], _cells[5] },
                 { _cells[6], _cells[7], _cells[8] }
             };
+
+            _towerInput.OnTowersAttacked += OnTowersAttacked;
         }
 
         private void Start()
         {
             _base = Services.GetService<BoardBase>();
             _base.InitializeBoard(this);
+            _boardCamera.InitializeCamera(_grid);
         }
 
         private void OnDestroy()
         {
             UnSubscribeAll();
+            _towerInput.OnTowersAttacked -= OnTowersAttacked;
         }
 
         private void UnSubscribeAll()
@@ -119,7 +127,7 @@ namespace LostThrone.Board
 
             for (int i = 0; i < towersArray.Length; i++)
             {
-                towersArray[i].InitializeTowerCard(_player, battleData.Tower);
+                towersArray[i].InitializeTowerCard(player, battleData.Tower);
                 towersArray[i].OnCardDestroyed += UnlistenCard;
                 towers.Add(towersArray[i]);
             }
@@ -151,7 +159,7 @@ namespace LostThrone.Board
 
         public void StartBattle(bool playerIsFirst, BattleData playerData, BattleData enemyData)
         {
-            _base.SetCameraTarget(_virtualCamera, Grid[0, 1]);
+            _boardCamera.SetCameraTarget(Grid[0, 1]);
 
             InititializePlayer(_player, playerData, _playerTowers);
             InititializePlayer(_enemy, enemyData, _enemyTowers);
@@ -199,17 +207,47 @@ namespace LostThrone.Board
 
         #endregion
 
+        #region Towers
+
+        private void ActivateTowerAttack()
+        {
+            BoardPlayer currentPlayer;
+            BoardPlayer nextPlayer;
+
+            if (_nextTurn == PositionType.Top)
+            {
+                currentPlayer = _player;
+                nextPlayer = _enemy;
+            }
+            else
+            {
+                currentPlayer = _enemy;
+                nextPlayer = _player;
+            }
+
+            _towerInput.InitializePlayer(currentPlayer, nextPlayer);
+            _towerInput.AttackEnemies();
+        }
+
+        #endregion
+
         #region Turn positions
 
         public void SwitchTurn()
         {
-            PositionType nextTurn = _turnPosition == PlayerPositionType ? EnemyPositionType : _turnPosition == EnemyPositionType ? PlayerPositionType : PositionType.Nothing;
-            SetTurnPosition(nextTurn);
+            _turnPosition = PositionType.Nothing;
+            ActivateTowerAttack();
+        }
+
+        private void OnTowersAttacked()
+        {
+            SetTurnPosition(_nextTurn);
         }
 
         private void SetTurnPosition(PositionType type)
         {
             _turnPosition = type;
+            _nextTurn = _turnPosition == PositionType.Top ? PositionType.Bottom : PositionType.Top;
             RefreshPlayerStates(PlayerState.Attack, PlayerState.Defend);
             OnPlayerTurnChanged?.Invoke(_turnPosition);
         }

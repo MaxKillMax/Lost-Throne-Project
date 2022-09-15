@@ -5,7 +5,10 @@ namespace LostThrone.Board
     public class PlayerInput : BoardInput
     {
         [SerializeField] private GameObject _playerTurnUI;
+        [SerializeField] private BoardCamera _boardCamera;
         [SerializeField] private Camera _camera;
+
+        protected UnitCard SelectedCard;
 
         private readonly float _minDragTime = 0.13f;
         private float _currentTime = 0.1f;
@@ -26,19 +29,44 @@ namespace LostThrone.Board
         protected override void Start()
         {
             base.Start();
-            // UNDONE: Camera initialized in the wrong place
-            Formulas.InitializeCamera(_camera);
         }
         
         private void CheckState(PositionType type)
         {
-            _playerTurnUI.SetActive(type == Player.Type);
+            if (type == Player.Type)
+            {
+                _playerTurnUI.SetActive(true);
+            }
+            else
+            {
+                _playerTurnUI.SetActive(false);
+
+                if(_selectionState == CardSelectionState.Opened)
+                {
+                    SelectedCard.GetCardView().CloseInfoPanel();
+                    RefreshState();
+                }
+
+                _boardCamera.ActivateOverviewMode();
+            }
         }
 
         private void Update()
         {
-            if (!Board.Base.PlayerCanMove(Player))
+            if (Input.GetKeyDown(KeyCode.W))
+                _boardCamera.MoveCamera(Direction.Top);
+            else if (Input.GetKeyDown(KeyCode.D))
+                _boardCamera.MoveCamera(Direction.Right);
+            else if (Input.GetKeyDown(KeyCode.S))
+                _boardCamera.MoveCamera(Direction.Bottom);
+            else if (Input.GetKeyDown(KeyCode.A))
+                _boardCamera.MoveCamera(Direction.Left);
+
+            if (!Base.PlayerCanMove(Player))
                 return;
+
+            if (Input.GetKeyDown(KeyCode.Space))
+                _boardCamera.SwitchOverviewMode();
 
             if (Input.GetMouseButtonDown(0))
                 OnInputMouseDown();
@@ -48,15 +76,6 @@ namespace LostThrone.Board
 
             if (Input.GetMouseButtonUp(0))
                 OnInputMouseUp();
-
-            if (Input.GetKeyDown(KeyCode.W))
-                Board.Base.MoveCamera(Direction.Top);
-            else if (Input.GetKeyDown(KeyCode.D))
-                Board.Base.MoveCamera(Direction.Right);
-            else if (Input.GetKeyDown(KeyCode.S))
-                Board.Base.MoveCamera(Direction.Bottom);
-            else if (Input.GetKeyDown(KeyCode.A))
-                Board.Base.MoveCamera(Direction.Left);
         }
 
         #region Inputs
@@ -73,10 +92,20 @@ namespace LostThrone.Board
                 SelectedCard = unitCard;
                 _currentTime = _minDragTime;
             }
+            else if (Formulas.TryGetObjectInMousePosition(out UnitCard enemyCard, (unitCard) => unitCard.GetPlayer() != Player))
+            {
+                _canOpenCard = enemyCard != SelectedCard || _selectionState != CardSelectionState.Opened;
+                _selectionState = CardSelectionState.Opened;
+                SelectedCard = enemyCard;
+
+                if (_canOpenCard)
+                    SelectedCard.GetCardView().OpenInfoPanel();
+                else
+                    RefreshState();
+            }
             else
             {
-                SelectedCard = null;
-                _selectionState = CardSelectionState.Nothing;
+                RefreshState();
             }
         }
 
@@ -122,6 +151,12 @@ namespace LostThrone.Board
             {
                 UseSelectedCard();
             }
+        }
+
+        private void RefreshState()
+        {
+            _selectionState = CardSelectionState.Nothing;
+            SelectedCard = null;
         }
 
         #endregion

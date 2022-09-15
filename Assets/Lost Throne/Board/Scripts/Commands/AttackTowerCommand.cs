@@ -5,18 +5,16 @@ using UnityEngine;
 
 namespace LostThrone.Board
 {
-    public class AttackTowerCommand : CardCommand
+    public class AttackTowerCommand : UnitCommand
     {
         private readonly BoardPlayer _enemy;
         private readonly TowerCard _enemyCard;
-        private UnitCard _unitCard;
         private Cell _cardCell;
 
-        public AttackTowerCommand(Board board, BoardPlayer player, Card card, BoardPlayer enemy, TowerCard enemyCard, Action onCommandEnded = null) : base(board, player, card, onCommandEnded)
+        public AttackTowerCommand(Board board, BoardPlayer player, UnitCard unitCard, BoardPlayer enemy, TowerCard enemyCard, Action onCommandEnded = null) : base(board, player, unitCard, onCommandEnded)
         {
             _enemy = enemy;
             _enemyCard = enemyCard;
-            _unitCard = Card as UnitCard;
         }
 
         protected override bool CanExecute()
@@ -25,14 +23,14 @@ namespace LostThrone.Board
 
             if (!base.CanExecute())
                 result = false;
-
-            if (!Board.Base.UnitCanAttackTower(_unitCard, Player))
+            
+            if (!Board.Base.UnitCanAttackTower(UnitCard, Player))
                 result = false;
 
-            if (Board.Base.CardTypesEquals(_unitCard, _enemyCard))
+            if (Board.Base.CardTypesEquals(UnitCard, _enemyCard))
                 result = false;
 
-            _cardCell = Board.Base.GetUnitCell(_unitCard);
+            _cardCell = Board.Base.GetUnitCell(UnitCard);
             Cell enemyCell = Board.Base.GetTowerCell(_enemy, _enemyCard);
 
             if (_cardCell != enemyCell)
@@ -43,15 +41,19 @@ namespace LostThrone.Board
 
         protected override void StartCommand()
         {
-            _enemyCard.GetDamage(_unitCard.GetUnit().GetStatistics(StatisticsType.Damage).Value);
-
-            Player.RemoveTurnPoints(_unitCard.TurnCost);
-            _unitCard.DoubleCost();
+            Player.RemoveTurnPoints(UnitCard.TurnCost);
 
             Sequence sequence = DOTween.Sequence();
-            sequence.Append(_unitCard.transform.DOMove(new Vector3(_enemyCard.transform.position.x, _enemyCard.transform.position.y, _unitCard.transform.position.z), 0.2f));
+            sequence.Append(UnitCard.transform.DOMove(new Vector3(_enemyCard.transform.position.x, _enemyCard.transform.position.y, UnitCard.transform.position.z), 0.2f));
+            sequence.AppendCallback(() => AttackEnemy());
             sequence.AppendCallback(() => EndCommand());
             sequence.Play();
+        }
+
+        private void AttackEnemy()
+        {
+            _enemyCard.GetDamage(UnitCard.GetUnit().GetStatistics(StatisticsType.Damage).Value);
+            UnitCard.DoubleCost();
         }
     }
 }

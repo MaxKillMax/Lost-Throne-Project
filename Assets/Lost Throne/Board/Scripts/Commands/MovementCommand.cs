@@ -2,17 +2,17 @@ using System;
 
 namespace LostThrone.Board
 {
-    public class MovementCommand : CardCommand
+    public class MovementCommand : UnitCommand
     {
         private Cell _endCell;
         private UnitCard _unitCard;
         private Cell _startCell;
         private Line _endLine;
 
-        public MovementCommand(Board board, BoardPlayer player, Card card, Cell endCell, Action onCommandEnded = null) : base(board, player, card, onCommandEnded)
+        public MovementCommand(Board board, BoardPlayer player, UnitCard card, Cell endCell, Action onCommandEnded = null) : base(board, player, card, onCommandEnded)
         {
             _endCell = endCell;
-            _unitCard = Card as UnitCard;
+            _unitCard = UnitCard as UnitCard;
         }
 
         protected override bool CanExecute()

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Cinemachine;
 using DG.Tweening;
 using LostThrone.Board;
 using UnityEngine;
@@ -9,9 +8,6 @@ namespace LostThrone
 {
     public class BoardBase : IService
     {
-        private Cell _currentCameraCell;
-        public Cell CurrentCameraCell => _currentCameraCell;
-
         private Formulas _formulas;
         private Formulas Formulas => _formulas ??= Services.GetService<Formulas>();
 
@@ -26,56 +22,12 @@ namespace LostThrone
             _cells = board.Cells;
         }
 
-        #region Do something
-
         public void RefreshLinePositions(Line line)
         {
             float middle = (line.Cards.Count - 1f) / 2;
             for (int i = 0; i < line.Cards.Count; i++)
                 line.Cards[i].transform.DOLocalMove(new Vector3(i - middle, 0, 0), 0.2f);
         }
-
-        public void MoveCamera(Direction direction)
-        {
-            for (int x = 0; x < _grid.GetLength(0); x++)
-            {
-                for (int y = 0; y < _grid.GetLength(1); y++)
-                {
-                    if (_grid[x, y] == _currentCameraCell)
-                    {
-                        switch (direction)
-                        {
-                            case Direction.Top:
-                                if (x + 1 < _grid.GetLength(0))
-                                    SetCameraTarget(_board.VirtualCamera, _grid[x + 1, y]);
-                                break;
-                            case Direction.Right:
-                                if (y + 1 < _grid.GetLength(1))
-                                    SetCameraTarget(_board.VirtualCamera, _grid[x, y + 1]);
-                                break;
-                            case Direction.Bottom:
-                                if (x - 1 >= 0)
-                                    SetCameraTarget(_board.VirtualCamera, _grid[x - 1, y]);
-                                break;
-                            case Direction.Left:
-                                if (y - 1 >= 0)
-                                    SetCameraTarget(_board.VirtualCamera, _grid[x, y - 1]);
-                                break;
-                        }
-
-                        return;
-                    }
-                }
-            }
-        }
-
-        public void SetCameraTarget(CinemachineVirtualCamera virtualCamera, Cell cell)
-        {
-            _currentCameraCell = cell;
-            virtualCamera.Follow = _currentCameraCell.transform;
-        }
-
-        #endregion
 
         #region Get something (positions)
 
@@ -182,14 +134,14 @@ namespace LostThrone
 
             for (int i = unitCards.Count - 1; i >= 0; i--)
             {
-                if (!UnitCanDie(unitCards[i], attacking))
+                if (!CardCanDie(unitCards[i], attacking))
                     unitCards.RemoveAt(i);
             }
 
             return units;
         }
 
-        public bool UnitCanDie(Card unitCard, Card attacking)
+        public bool CardCanDie(Card unitCard, Card attacking)
         {
             float health = unitCard.GetUnit().GetStatistics(StatisticsType.Health).Value;
             float armor = unitCard.GetUnit().GetStatistics(StatisticsType.Armor).Value;
@@ -321,7 +273,7 @@ namespace LostThrone
 
         public bool UnitCanAttack(UnitCard unit, BoardPlayer player) => player.TurnPoints >= unit.TurnCost && !player.Hand.Cards.Contains(unit) && GetUnitCell(unit).GetLine(player.Type == PositionType.Bottom ? PositionType.Top : PositionType.Bottom).Cards.Count > 0;
 
-        public bool UnitCanAttackTower(UnitCard unit, BoardPlayer player) => player.TurnPoints >= unit.TurnCost && GetUnitCell(unit, out int horizontal, out int vertical) && vertical == (player.Type == _board.PlayerPositionType ? _board.EnemyLine : _board.PlayerLine);
+        public bool UnitCanAttackTower(UnitCard unit, BoardPlayer player) => player.TurnPoints >= unit.TurnCost && GetUnitCell(unit, out _, out int vertical) && vertical == (player.Type == _board.PlayerPositionType ? _board.EnemyLine : _board.PlayerLine);
 
         public bool UnitCanMove(UnitCard unit, BoardPlayer player) => player.TurnPoints >= unit.TurnCost && (GetUnitCell(unit).GetLine(player.Type == PositionType.Bottom ? PositionType.Top : PositionType.Bottom).Cards.Count == 0 || player.Hand.Cards.Contains(unit));
 

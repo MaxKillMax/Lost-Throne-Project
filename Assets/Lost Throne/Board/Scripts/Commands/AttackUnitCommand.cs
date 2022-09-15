@@ -5,16 +5,14 @@ using UnityEngine;
 
 namespace LostThrone.Board
 {
-    public class AttackUnitCommand : CardCommand
+    public class AttackUnitCommand : UnitCommand
     {
         private UnitCard _enemy;
-        private UnitCard _unitCard;
         private Cell _cardCell;
 
-        public AttackUnitCommand(Board board, BoardPlayer player, Card card, UnitCard enemy, Action onCommandEnded = null) : base(board, player, card, onCommandEnded)
+        public AttackUnitCommand(Board board, BoardPlayer player, UnitCard unitCard, UnitCard enemy, Action onCommandEnded = null) : base(board, player, unitCard, onCommandEnded)
         {
             _enemy = enemy;
-            _unitCard = Card as UnitCard;
         }
 
         protected override bool CanExecute()
@@ -24,13 +22,13 @@ namespace LostThrone.Board
             if (!base.CanExecute())
                 result = false;
 
-            if (!Board.Base.UnitCanAttack(_unitCard, Player))
+            if (!Board.Base.UnitCanAttack(UnitCard, Player))
                 result = false;
 
-            if (Board.Base.CardTypesEquals(_unitCard, _enemy))
+            if (Board.Base.CardTypesEquals(UnitCard, _enemy))
                 result = false;
 
-            _cardCell = Board.Base.GetUnitCell(_unitCard);
+            _cardCell = Board.Base.GetUnitCell(UnitCard);
             Cell enemyCell = Board.Base.GetUnitCell(_enemy);
 
             if (_cardCell != enemyCell)
@@ -41,15 +39,19 @@ namespace LostThrone.Board
 
         protected override void StartCommand()
         {
-            _enemy.GetDamage(_unitCard.GetUnit().GetStatistics(StatisticsType.Damage).Value);
-
-            Player.RemoveTurnPoints(_unitCard.TurnCost);
-            _unitCard.DoubleCost();
+            Player.RemoveTurnPoints(UnitCard.TurnCost);
 
             Sequence sequence = DOTween.Sequence();
-            sequence.Append(_unitCard.transform.DOMove(new Vector3(_enemy.transform.position.x, _enemy.transform.position.y, _unitCard.transform.position.z), 0.2f));
+            sequence.Append(UnitCard.transform.DOMove(new Vector3(_enemy.transform.position.x, _enemy.transform.position.y, UnitCard.transform.position.z), 0.2f));
+            sequence.AppendCallback(() => AttackEnemy());
             sequence.AppendCallback(() => EndCommand());
             sequence.Play();
+        }
+
+        private void AttackEnemy()
+        {
+            _enemy.GetDamage(UnitCard.GetUnit().GetStatistics(StatisticsType.Damage).Value);
+            UnitCard.DoubleCost();
         }
     }
 }

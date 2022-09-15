@@ -8,6 +8,8 @@ namespace LostThrone.Board
     {
         public Action<AIState> OnStateChanged;
 
+        protected UnitCard SelectedCard;
+
         private readonly float _delayBeforeAction = 1;
         private float _time = 1;
 
@@ -27,24 +29,20 @@ namespace LostThrone.Board
 
             _time = _delayBeforeAction;
 
-            // TODO: AIInput contains debug code. Remove it
             if (TryGetEnemyUnitCard(ref SelectedCard, out UnitCard enemyUnitCard))
             {
-                //Debug.Log("Attack units: " + SelectedCard + " : " + enemyUnitCard);
                 SetAIState(AIState.Attacks);
                 AttackUnitCard(enemyUnitCard);
                 return;
             }
             else if (TryGetEnemyTowerCard(ref SelectedCard, out TowerCard enemyTowerCard))
             {
-                //Debug.Log("Attack towers: " + SelectedCard + " : " + enemyTowerCard);
                 SetAIState(AIState.AttackTower);
                 AttackTowerCard(enemyTowerCard);
                 return;
             }
             else if (CanMove(ref SelectedCard, out Cell cell))
             {
-                //Debug.Log("Move units: " + SelectedCard + " : " + cell);
                 SetAIState(AIState.Moving);
                 MoveToCell(cell);
                 return;
@@ -67,12 +65,12 @@ namespace LostThrone.Board
         {
             enemyUnitCard = default;
 
-            List<UnitCard> cards = GetCards((unitCard) => Board.Base.UnitCanAttack(unitCard, Player));
+            List<UnitCard> cards = GetCards((unitCard) => Base.UnitCanAttack(unitCard, Player));
 
             if (cards.Count == 0)
                 return false;
 
-            UnitCard card = Board.Base.GetUnitWithBestCondition(cards, true, GetUnitAttackImportance);
+            UnitCard card = Base.GetUnitWithBestCondition(cards, true, GetUnitAttackImportance);
             UnitCard enemyCard = GetEnemyUnitWithBestAttackImportance(card);
 
             unitCard = card;
@@ -81,16 +79,16 @@ namespace LostThrone.Board
         }
 
         private float GetUnitAttackImportance(UnitCard unitCard)
-            => Formulas.GetUnitAttackImportance(Board.Base.GetUnitWithBestAttackImportance(Board.Base.GetUnitCell(unitCard).GetLine(Player.Type).Cards, out _).GetUnit());
+            => Formulas.GetUnitAttackImportance(Base.GetUnitWithBestAttackImportance(Base.GetUnitCell(unitCard).GetLine(Player.Type).Cards, out _).GetUnit());
 
         private UnitCard GetEnemyUnitWithBestAttackImportance(UnitCard unitCard)
-            => (UnitCard)Board.Base.GetUnitWithBestAttackImportance(Board.Base.GetUnitCell(unitCard).GetLine(Enemy.Type).Cards, out _);
+            => (UnitCard)Base.GetUnitWithBestAttackImportance(Base.GetUnitCell(unitCard).GetLine(Enemy.Type).Cards, out _);
 
         private bool TryGetEnemyTowerCard(ref UnitCard unitCard, out TowerCard enemyTowerCard)
         {
             enemyTowerCard = default;
 
-            List<UnitCard> cards = GetCards((unitCard) => Board.Base.UnitCanAttackTower(unitCard, Player));
+            List<UnitCard> cards = GetCards((unitCard) => Base.UnitCanAttackTower(unitCard, Player));
 
             if (cards.Count == 0)
                 return false;
@@ -98,8 +96,8 @@ namespace LostThrone.Board
             List<UnitCard> towerCards = new(1);
             for (int i = 0; i < Enemy.Towers.Count; i++)
             {
-                Cell towerCell = Board.Base.GetTowerCell(Enemy, Enemy.Towers[i]);
-                towerCards.Add(Board.Base.GetUnitWithCondition(cards, (unitCard) => Board.Base.GetUnitCell(unitCard) == towerCell));
+                Cell towerCell = Base.GetTowerCell(Enemy, Enemy.Towers[i]);
+                towerCards.Add(Base.GetUnitWithCondition(cards, (unitCard) => Base.GetUnitCell(unitCard) == towerCell));
             }
 
             if (towerCards.Count == 0)
@@ -111,7 +109,7 @@ namespace LostThrone.Board
             {
                 if (towerCards[i] != null)
                 {
-                    if (Board.Base.UnitCanDie(Enemy.Towers[i], towerCards[i]))
+                    if (Base.CardCanDie(Enemy.Towers[i], towerCards[i]))
                     {
                         unitCard = towerCards[i];
                         enemyTowerCard = Enemy.Towers[i];
@@ -138,16 +136,16 @@ namespace LostThrone.Board
         {
             cell = default;
 
-            List<UnitCard> cards = GetCards((unitCard) => Board.Base.UnitCanMove(unitCard, Player));
-            cards = Board.Base.GetUnitsWithBestCondition(cards, false, (unitCard) => unitCard.TurnCost);
+            List<UnitCard> cards = GetCards((unitCard) => Base.UnitCanMove(unitCard, Player));
+            cards = Base.GetUnitsWithBestCondition(cards, false, (unitCard) => unitCard.TurnCost);
 
             if (cards.Count == 0)
                 return false;
 
             UnitCard card = cards[UnityEngine.Random.Range(0, cards.Count)];
 
-            List<Cell> cells = Board.Base.GetMovementCells(Player, card);
-            List<Card> enemies = new(1);
+            List<Cell> cells = Base.GetMovementCells(Player, card);
+            List<UnitCard> enemies = new(1);
 
             float maxPriority = float.MinValue;
             Cell priorityCell = default;
@@ -160,8 +158,8 @@ namespace LostThrone.Board
                 Line enemyLine = cells[i].GetLine(Enemy.Type);
                 Line playerLine = cells[i].GetLine(Player.Type);
 
-                float enemyPriority = Board.Base.GetSumOfUnitsCondition(enemyLine.Cards, (unit) => Formulas.GetUnitAttackImportance(unit.GetUnit()));
-                float playerPriority = Board.Base.GetSumOfUnitsCondition(playerLine.Cards, (unit) => Formulas.GetUnitAttackImportance(unit.GetUnit()));
+                float enemyPriority = Base.GetSumOfUnitsCondition(enemyLine.Cards, (unit) => Formulas.GetUnitAttackImportance(unit.GetUnit()));
+                float playerPriority = Base.GetSumOfUnitsCondition(playerLine.Cards, (unit) => Formulas.GetUnitAttackImportance(unit.GetUnit()));
                 float linePriority = enemyPriority - playerPriority;
 
                 if (linePriority > maxPriority)

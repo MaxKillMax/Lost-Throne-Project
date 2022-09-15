@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace LostThrone.Board
 {
-    public class DropCommand : CardCommand
+    public class DropCommand : UnitCommand
     {
         private Cell _unitCell;
 
@@ -12,9 +12,9 @@ namespace LostThrone.Board
 
         protected override void StartCommand()
         {
-            _unitCell = Board.Base.GetUnitCell((UnitCard)Card);
+            _unitCell = Board.Base.GetUnitCell(UnitCard);
 
-            Card.transform.position = new Vector3(Card.transform.position.x, Card.transform.position.y, 0);
+            UnitCard.transform.position = new Vector3(UnitCard.transform.position.x, UnitCard.transform.position.y, 0);
 
             Sequence sequence = DOTween.Sequence();
             sequence.AppendCallback(() => PutCard());
@@ -24,7 +24,7 @@ namespace LostThrone.Board
 
         private void PutCard()
         {
-            Card.transform.DOScale(1.0f, Board.RefreshLinesTime);
+            UnitCard.transform.DOScale(1.0f, Board.RefreshLinesTime);
             Board.Base.RefreshLinePositions(_unitCell.GetLine(Player.Type));
         }
     }

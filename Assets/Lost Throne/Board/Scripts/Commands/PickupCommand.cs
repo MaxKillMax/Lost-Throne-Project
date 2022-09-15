@@ -4,16 +4,16 @@ using UnityEngine;
 
 namespace LostThrone.Board
 {
-    public class PickupCommand : CardCommand
+    public class PickupCommand : UnitCommand
     {
         public PickupCommand(Board board, BoardPlayer player, UnitCard unitCard, Action onCommandEnded = null) : base(board, player, unitCard, onCommandEnded) { }
 
         protected override void StartCommand()
         {
-            Card.transform.position = new Vector3(Card.transform.position.x, Card.transform.position.y, -1);
+            UnitCard.transform.position = new Vector3(UnitCard.transform.position.x, UnitCard.transform.position.y, -1);
 
             Sequence sequence = DOTween.Sequence();
-            sequence.Append(Card.transform.DOScale(1.5f, 0.2f));
+            sequence.Append(UnitCard.transform.DOScale(1.5f, Board.RefreshLinesTime));
             sequence.AppendCallback(() => EndCommand());
         }
     }

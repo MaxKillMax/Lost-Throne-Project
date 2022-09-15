@@ -37,8 +37,8 @@ namespace LostThrone.Board
 
         public override void GetDamage(float value)
         {
-            float health = GetUnit().GetStatistics(StatisticsType.Health).Value - Services.GetService<Formulas>().DamageReducedByArmor(value, GetUnit().GetStatistics(StatisticsType.Armor).Value);
-            GetUnit().GetStatistics(StatisticsType.Health).SetValue(health);
+            float health = Unit.GetStatistics(StatisticsType.Health).Value - Services.GetService<Formulas>().DamageReducedByArmor(value, Unit.GetStatistics(StatisticsType.Armor).Value);
+            Unit.GetStatistics(StatisticsType.Health).SetValue(health);
 
             if (health <= 0)
                 DestroyCard();
