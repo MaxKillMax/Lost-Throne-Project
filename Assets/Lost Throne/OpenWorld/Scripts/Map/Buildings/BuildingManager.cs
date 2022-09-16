@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class BuildingManager : MonoBehaviour
 {
+    // TODO: Building have values x and y position on grid
     private List<Building> _buildings;
 
     public List<Building> Buildings => _buildings;

@@ -64,6 +64,7 @@ namespace LostThrone.OpenWorld
 
         public override void Update()
         {
+            // TODO: Coroutine
             Data.Transform.position = Vector3.MoveTowards(Data.Transform.position, _path[_currentPath].RealPosition, _speed * _slowestUnitSpeed * _path[_currentPath].MovementMultiply * 0.00001f);
 
             if (Vector2.Distance(Data.Transform.position, _path[_currentPath].RealPosition) < _minDistance)

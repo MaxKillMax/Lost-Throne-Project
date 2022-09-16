@@ -5,7 +5,6 @@ namespace LostThrone
 {
     public abstract class Window : MonoBehaviour
     {
-        // UNDONE: Лучше делать 1 Action с булевым параметром, или так, как здесь?
         public event Action OnWindowOpened;
         public event Action OnWindowClosed;
 

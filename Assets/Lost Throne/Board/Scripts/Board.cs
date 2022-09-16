@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Cinemachine;
 using LostThrone.OpenWorld;
 using NaughtyAttributes;
 using UnityEngine;

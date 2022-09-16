@@ -45,7 +45,7 @@ public class Generator : MonoBehaviour
 
     private Tile[][] _tilesTypes;
 
-    private List<TileData> _findedTiles;
+    private List<TileData> _foundTiles;
 
     private List<Building> _createdBuildings;
 
@@ -57,7 +57,7 @@ public class Generator : MonoBehaviour
 
     private void InitializeMap()
     {
-        _findedTiles = new List<TileData>(5000);
+        _foundTiles = new List<TileData>(5000);
         _tilesTypes = new Tile[][] { _easyTiles, _usuallyTiles, _hardlyTiles, _impassableTiles };
 
         Vector3Int position = new();
@@ -71,14 +71,14 @@ public class Generator : MonoBehaviour
                 Tile tile = _tilemap.GetTile(position) as Tile;
 
                 if (tile != null)
-                    _findedTiles.Add(new TileData(tile, GetTileType(tile), position, _tilemap.CellToWorld(position), _tileMovementMultiplies[(int)GetTileType(tile)], _tileMovementCosts[(int)GetTileType(tile)]));
+                    _foundTiles.Add(new TileData(tile, GetTileType(tile), position, _tilemap.CellToWorld(position), _tileMovementMultiplies[(int)GetTileType(tile)], _tileMovementCosts[(int)GetTileType(tile)]));
             }
         }
 
         Wave _pathfinding = new();
         _pathfinding.Initialize(_map, _tilemap, DebugCreateText, _debugPathfinding);
 
-        _map.InitializeMap(_grid, _tilemap, _findedTiles, _pathfinding);
+        _map.InitializeMap(_grid, _tilemap, _foundTiles, _pathfinding);
     }
 
     private void GenerateBuildings()
@@ -146,6 +146,7 @@ public enum TileType
 
 public struct TileData
 {
+    // TODO: Add building
     private Tile _tile;
     public Tile Tile { get => _tile; set => _tile = value; }
 

@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8da6772afd47f664b8d1bd9cba9be3d0, type: 3}
   m_Name: house
   m_EditorClassIdentifier: 
-  Name: House
-  Icon: {fileID: 21300000, guid: 49380d02bc4aaf240b21f6c5eb7edeac, type: 3}
-  Type: 3
-  GroundTypes: 000000000100000002000000
-  SpawnChanceChange: 0.075
+  _name: 
+  _icon: {fileID: 0}
+  _type: 0
+  _groundTypes: 00000000
+  _spawnChanceChange: 0
