@@ -23,13 +23,14 @@ RUSSIAN VERSION
 - На ячейки на доске навешан скрипт Cell, который внутри себя хранит 2 скрипта Line: линия нижнего врага и верхнего врага.
 - Скрипт BattleStarter является временной альтернативой нормальному запуску карточной игры. По нормальному, карточная игра должна запускаться через "OpenWorld", но его пока нет, т.к. он не так важен,
 как core геймплей - "Board".
-- Внутри Scripts/Inputs находятся вводы разных сторон. Все они наследуются от BoardInput и контроллируют определённого BoardPlayer или другую часть.
+- Внутри Scripts/Inputs находятся вводы разных сторон. Все они наследуются от BoardInput и контроллируют определённого BoardPlayer или другую часть. TowerInput контролирует башни после конца хода игроков.
 - Например, PlayerInput управляется самим игроком BoardPlayer, а AIInput управляет ходами ИИ.
 - Файл Scripts/Commands является просто сборником комманд, которые могут быть реализованы разными Input-ами.
 - В Scripts/Cards находится главная интерактивная часть - карты. Они делятся на TowerCard и UnitCard. 
+- Внутри файла Scripts/Camera находится управление камерой.
+
 Карточки башен неподвижны, и управляются исключительно TowerInput.
 Карточки юнитов используются самими сторонами для перемещения их по карте, атаки вражеских карт и башен.
-
 
 2. "OpenWorld".
 - Находится в стадии разработки. Ничего нет
@@ -38,6 +39,8 @@ RUSSIAN VERSION
 - Первый и главный на данный момент сервис - BoardBase. Контроллирует алгоритмы, ответственные за настольную часть игры.
 - Formulas является сборником формул, констант и алгоритмов, универсальных для всей игры.
 Там содержатся универсальные данные, связанные с рассчётом данных: найти объекты на определённой позиции, вычесть из урона броню и т.д.
+- UI. Работает в связке с Window. Контроллирует запущенные окна.
+- Initializator. Глобальный сервис, который может быть переопределён для создания инициализаторов на сценах (для нужд конкретной сцены или всей игры)
 
 ------------------
 ENGLISH VERSION
@@ -55,13 +58,14 @@ There is also an additional separate file "Game/Scripts", which contains global 
 - The Cell script is hung on the cells on the board, which stores 2 Line scripts inside itself: the line of the lower enemy and the upper enemy.
 - The BattleStarter script is a temporary alternative to the normal launch of a card game. Normally, the card game should be launched through "OpenWorld", but it does not exist yet, because. he's not that important
 like core gameplay - "Board".
-- Inside Scripts/Inputs are inputs from different sides. They all inherit from BoardInput and control a specific BoardPlayer or other part.
+- Inside Scripts/Inputs are inputs from different sides. They all inherit from BoardInput and control a specific BoardPlayer or other part. TowerInput controls the towers after the end of the players turn.
 - For example, PlayerInput is controlled by the BoardPlayer itself, while AIInput controls AI moves.
 - The Scripts/Commands file is just a collection of commands that can be implemented by different Inputs.
 - Scripts/Cards contains the main interactive part - cards. They are divided into TowerCard and UnitCard.
+- Inside the Scripts/Camera file is the camera control.
+
 Tower cards are immobile, and are controlled exclusively by TowerInput.
 Unit cards are used by the parties themselves to move them around the map, attacking enemy cards and towers.
-
 
 2. "OpenWorld".
 - Is under development. There is nothing
@@ -70,3 +74,5 @@ Unit cards are used by the parties themselves to move them around the map, attac
 - The first and main service at the moment is BoardBase. Controls the algorithms responsible for the board game.
 - Formulas is a collection of formulas, constants and algorithms that are universal for the whole game.
 It contains universal data related to data calculation: find objects at a certain position, subtract armor from damage, etc.
+-UI. Works in conjunction with Window. Controls running windows.
+- initializer. A global service that can be reimplemented to create initializers on scenes (for the needs of a particular scene or the whole game)
