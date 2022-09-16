@@ -14,6 +14,8 @@ namespace LostThrone.Board
         protected BoardPlayer Player;
         protected Unit Unit;
 
+        protected CardInfoWindow CardInfoWindow;
+
         public abstract CardType Type { get; }
 
         public BoardPlayer GetPlayer() => Player;
@@ -35,6 +37,7 @@ namespace LostThrone.Board
             Unit.GetStatistics(StatisticsType.Armor).OnValueChanged += CardView.RefreshStatistics;
             Unit.GetStatistics(StatisticsType.Health).OnValueChanged += CardView.RefreshStatistics;
 
+            CardInfoWindow = Services.GetService<UI>().GetWindow<CardInfoWindow>();
             CardView.RefreshUI();
         }
 

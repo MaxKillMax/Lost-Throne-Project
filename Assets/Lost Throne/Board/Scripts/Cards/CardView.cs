@@ -34,10 +34,6 @@ namespace LostThrone.Board
 
         private Unit _unit;
 
-        public void OpenInfoPanel() => InfoObject.SetActive(true);
-
-        public void CloseInfoPanel() => InfoObject.SetActive(false);
-
         public void InitializeUnit(Unit unit)
         {
             _unit = unit;

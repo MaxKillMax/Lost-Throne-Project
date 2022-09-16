@@ -11,6 +11,7 @@ namespace LostThrone.Board
 
         private Board _board;
 
+        private int _basicTurnCost;
         private int _turnCost;
         public int TurnCost => _turnCost;
 
@@ -18,6 +19,7 @@ namespace LostThrone.Board
         {
             _board = board;
             _unitCardView = CardView as UnitCardView;
+            _basicTurnCost = Mathf.RoundToInt(Services.GetService<Formulas>().GetUnitImportance(unit));
 
             RefreshCard();
             InitializeUnit(player, unit);
@@ -31,7 +33,7 @@ namespace LostThrone.Board
 
         public void RefreshCard()
         {
-            _turnCost = 1;
+            _turnCost = _basicTurnCost;
             _unitCardView.SetTurnCostText(_turnCost);
         }
 

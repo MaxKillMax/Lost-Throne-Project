@@ -8,7 +8,7 @@ namespace LostThrone.Board
     {
         public Action<AIState> OnStateChanged;
 
-        protected UnitCard SelectedCard;
+        private UnitCard _selectedCard;
 
         private readonly float _delayBeforeAction = 1;
         private float _time = 1;
@@ -29,19 +29,19 @@ namespace LostThrone.Board
 
             _time = _delayBeforeAction;
 
-            if (TryGetEnemyUnitCard(ref SelectedCard, out UnitCard enemyUnitCard))
+            if (TryGetEnemyUnitCard(ref _selectedCard, out UnitCard enemyUnitCard))
             {
                 SetAIState(AIState.Attacks);
                 AttackUnitCard(enemyUnitCard);
                 return;
             }
-            else if (TryGetEnemyTowerCard(ref SelectedCard, out TowerCard enemyTowerCard))
+            else if (TryGetEnemyTowerCard(ref _selectedCard, out TowerCard enemyTowerCard))
             {
                 SetAIState(AIState.AttackTower);
                 AttackTowerCard(enemyTowerCard);
                 return;
             }
-            else if (CanMove(ref SelectedCard, out Cell cell))
+            else if (CanMove(ref _selectedCard, out Cell cell))
             {
                 SetAIState(AIState.Moving);
                 MoveToCell(cell);
@@ -185,7 +185,7 @@ namespace LostThrone.Board
 
         private void AttackUnitCard(UnitCard enemyUnitCard)
         {
-            UnitCard cachedCard = SelectedCard;
+            UnitCard cachedCard = _selectedCard;
 
             new PickupCommand(Board, Player, cachedCard, () =>
             new AttackUnitCommand(Board, Player, cachedCard, enemyUnitCard, () =>
@@ -194,7 +194,7 @@ namespace LostThrone.Board
 
         private void AttackTowerCard(TowerCard enemyTowerCard)
         {
-            UnitCard cachedCard = SelectedCard;
+            UnitCard cachedCard = _selectedCard;
 
             new PickupCommand(Board, Player, cachedCard, () =>
             new AttackTowerCommand(Board, Player, cachedCard, Enemy, enemyTowerCard, () =>
@@ -203,7 +203,7 @@ namespace LostThrone.Board
 
         private void MoveToCell(Cell cell)
         {
-            UnitCard cachedCard = SelectedCard;
+            UnitCard cachedCard = _selectedCard;
 
             new PickupCommand(Board, Player, cachedCard, () =>
             new MovementCommand(Board, Player, cachedCard, cell, () =>
