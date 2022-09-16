@@ -6,14 +6,9 @@ namespace LostThrone
     {
         private Window[] _windows;
 
-        public UI(Window[] windows)
+        public void InitializeWindows(Window[] windows)
         {
             _windows = windows;
-            InitializeWindows(_windows);
-        }
-
-        private void InitializeWindows(Window[] windows)
-        {
             for (int i = 0; i < windows.Length; i++)
                 windows[i].InitializeWindow();
         }

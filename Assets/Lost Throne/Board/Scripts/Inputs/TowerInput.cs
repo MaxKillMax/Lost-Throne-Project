@@ -28,7 +28,6 @@ namespace LostThrone.Board
             while (index < towers.Count)
             {
                 AttackEnemy(towers[index], enemies[index]);
-                Debug.Log(towers[index] + " : " + enemies[index]);
                 index++;
                 yield return new WaitForSeconds(1);
             }

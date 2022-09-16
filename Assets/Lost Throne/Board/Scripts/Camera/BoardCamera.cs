@@ -21,11 +21,9 @@ namespace LostThrone.Board
 
         private Cell[,] _grid;
 
-        public void InitializeCamera(Cell[,] grid)
+        public void InitializeGrid(Cell[,] grid)
         {
             _grid = grid;
-            // TODO: Camera initialized in initializer
-            Services.GetService<Formulas>().InitializeCamera(_camera);
         }
 
         public void MoveCamera(Direction direction)

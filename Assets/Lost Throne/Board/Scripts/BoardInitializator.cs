@@ -4,13 +4,16 @@ namespace LostThrone
 {
     public class BoardInitializator : Initializator
     {
-        [SerializeField] private Window[] _boardWindows;
+        [SerializeField] private Camera _camera;
+        [SerializeField] private Window[] _windows;
 
         protected override void Initialize()
         {
+            if (Services.HaveService<Formulas>())
+                Services.GetService<Formulas>().InitializeCamera(_camera);
+
             if (Services.HaveService<UI>())
-                Services.UnregisterService(Services.GetService<UI>());
-            Services.RegisterService(new UI(_boardWindows));
+                Services.GetService<UI>().InitializeWindows(_windows);
         }
     }
 }

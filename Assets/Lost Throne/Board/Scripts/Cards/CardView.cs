@@ -19,18 +19,8 @@ namespace LostThrone.Board
         [SerializeField, Foldout("Values")]
         protected TMP_Text HealthText;
 
-        [SerializeField, Foldout("Modificators")]
-        protected Transform ModificatorsParent;
-        [SerializeField, Foldout("Modificators")]
-        protected GameObject ModificatorPrefab;
-
         [SerializeField, Foldout("Additionals")]
         protected TMP_Text LevelText;
-        [SerializeField, Foldout("Additionals")]
-        protected TMP_Text RarityText;
-
-        [SerializeField, Foldout("Info Panel")]
-        protected GameObject InfoObject;
 
         private Unit _unit;
 
@@ -44,7 +34,6 @@ namespace LostThrone.Board
             TitleText.text = _unit.Name;
             IconImage.sprite = _unit.CardIcon;
             LevelText.text = _unit.Level.ToString();
-            RarityText.text = _unit.CardRarity.ToString();
 
             RefreshStatistics();
         }

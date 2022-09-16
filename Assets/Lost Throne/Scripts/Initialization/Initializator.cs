@@ -9,6 +9,7 @@ namespace LostThrone
         private void Awake()
         {
             Initialize();
+            Destroy(gameObject);
         }
 
         protected abstract void Initialize();

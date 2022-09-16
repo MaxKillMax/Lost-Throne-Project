@@ -92,7 +92,7 @@ namespace LostThrone.Board
         {
             _base = Services.GetService<BoardBase>();
             _base.InitializeBoard(this);
-            _boardCamera.InitializeCamera(_grid);
+            _boardCamera.InitializeGrid(_grid);
         }
 
         private void OnDestroy()
